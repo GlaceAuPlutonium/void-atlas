@@ -1,0 +1,30 @@
+# Template file for 'noctalia-qs'
+pkgname=noctalia-qs
+_commit=b2c7d526d8a1a61a3d744f3910a508615f05eced
+version=0.0.12
+revision=2
+build_style=cmake
+configure_args="-DCMAKE_BUILD_TYPE=Release
+ -DDISTRIBUTOR=Void
+ -DDISTRIBUTOR_DEBUGINFO_AVAILABLE=Yes
+ -DCRASH_REPORTER=Off
+ -DGIT_REVISION=${_commit}
+ -DINSTALL_QML_PREFIX=lib/qt6/qml"
+hostmakedepends="cli11 curl git pkg-config
+ qt6-shadertools SPIRV-Tools Vulkan-Headers
+ wayland-protocols"
+makedepends="jemalloc-devel libdrm-devel
+ libglvnd-devel libxcb-devel pam-devel
+ pipewire-devel polkit-devel qt6-base-devel
+ qt6-declarative-devel qt6-quick3d-private-devel
+ qt6-shadertools-devel qt6-svg-devel
+ qt6-wayland-devel wayland-devel"
+depends="hicolor-icon-theme jemalloc libdrm
+ libglvnd libxcb mesa pam polkit wayland"
+short_desc="Custom fork of Quickshell powering Noctalia Shell"
+maintainer="Voiders <voiders@git.voiders.dev>"
+license="LGPL-3.0-only"
+homepage="https://github.com/noctalia-dev/noctalia-qs"
+distfiles="${homepage}/archive/v${version}.tar.gz"
+checksum=5de37541537307d141618aa0d782d3c34e42a6ad21c73533cce80c0e71ee9693
+conflicts="quickshell>=0"

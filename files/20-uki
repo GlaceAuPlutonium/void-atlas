@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# post-install hook for dracut (initramfs + UKI + Visor boot.conf)
+#
+# Arguments passed to this script: $1 pkgname, $2 version.
+#
+PKGNAME="$1"
+VERSION="$2"
+
+[ -x usr/bin/dracut ] || exit 0
+
+UKIDIR="boot/efi/EFI/Linux"
+BOOTCONF="boot/efi/EFI/visor/boot.conf"
+SHORT="${VERSION%%_*}"                  # 7.x.x_1 -> 7.x.x
+UKI="linux-${SHORT}.efi"
+
+usr/bin/dracut --force --uefi "$UKIDIR/$UKI" ${VERSION} || exit $?
+
+[ -f "$BOOTCONF" ] || exit 0
+cp -f "$BOOTCONF" "$BOOTCONF.bak" || exit 1
+sed \
+	-e '/^[[:space:]]*name[[:space:]]*=[[:space:]]*"Void /s|"Void [^"]*"|"Void '"$SHORT"'"|' \
+	-e '/^[[:space:]]*kernel[[:space:]]*=.*Linux.linux-/s|linux-[^[:space:]]*\.efi|'"$UKI"'|' \
+	"$BOOTCONF" > "$BOOTCONF.new" || { rm -f "$BOOTCONF.new"; exit 1; }
+
+# replace boot.conf if new uki is there (useless or nah ??)
+if grep -q "$UKI" "$BOOTCONF.new"; then
+	mv -f "$BOOTCONF.new" "$BOOTCONF"
+else
+	echo "20-initramfs: boot.conf not modified (new uki not found)" >&2
+	rm -f "$BOOTCONF.new"
+	exit 1
+fi

@@ -1,0 +1,17 @@
+#!/bin/sh
+
+[ -f /tmp/suspend_time ] && [ -f /tmp/suspend_bat ] || exit 0
+
+T1=$(cat /tmp/suspend_time)
+B1=$(cat /tmp/suspend_bat)
+T2=$(date +%s)
+B2=$(cat /sys/class/power_supply/BAT1/charge_now)
+
+DIFSEC=$((T2 - T1))
+DIFMIN=$((DIFSEC / 60))
+DIFBAT=$(awk -v b1="$B1" -v b2="$B2" 'BEGIN { printf "%.4f", ((b1-b2) * 100) / 4677000 }')
+
+H=$((DIFMIN / 60))
+M=$((DIFMIN % 60))
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') | Veille: ${H}h ${M}m | Perte: ${DIFBAT}%" >> /var/log/sleep_drain.log

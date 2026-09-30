@@ -1,0 +1,336 @@
+// -*- mode: jsonc -*-
+{
+    "layer": "top",
+    "position": "top",
+    "height": 22,
+    "spacing": 2,
+    "reload_style_on_change": true,
+    
+    // Choose the order of the modules
+    "modules-left": [
+        "custom/launcher",
+        "custom/work1",
+        "custom/work2",
+        "custom/work3",
+        "custom/work4",
+        "custom/work5",
+        "custom/work6",
+        "custom/work7",
+        "custom/work8",
+        "custom/work9",
+        "wlr/taskbar"
+        ],
+        
+    "modules-center": [
+        "clock"
+        ],
+        
+    "modules-right": [
+        "mpd",
+        "power-profiles-daemon",
+//        "custom/yazi",
+//        "custom/kitty",
+        "cpu",
+        "memory",
+        "temperature",
+        "backlight",
+        "network",
+        "pulseaudio",
+        "battery",
+        "tray",
+        "custom/power"
+        ],
+
+    "custom/launcher": {
+        "format": " ",
+        "on-click": "wofi -n --show drun",
+        "tooltip": false
+        },
+
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "icon-size": 18,
+        "icon-theme": "MoreWaita",
+        "tooltip-format": "{title}",
+        "active-first": "false",
+        "on-click": "activate",
+        "on-click-middle": "close",
+        "on-click-right": "minimize",
+        "ignore-list": ["thunar","Cavalier","Tilix","Character Map", "Settings","GNOME Tweaks", "Terminal","Calculator","conky (arch1)","blackbox"],
+        },
+
+    "custom/kitty": {
+        "format": " ",
+        "tooltip-format": "Start kitty",
+		"on-click": "kitty"
+        },
+
+    "custom/yazi":{
+        "format": " ",
+        "tooltip-format": "Start yazi",
+		"on-click": "kitty -e yazi"
+		},
+
+    "custom/work1": {
+        "on-click": "python3 ~/.config/scripts/work1.py",
+//        "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+//        "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "1{}",
+        },
+
+    "custom/work2": {
+        "on-click": "python3 ~/.config/scripts/work2.py",
+//        "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+ //       "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "2{}",
+        },
+
+     "custom/work3": {
+        "on-click": "python3 ~/.config/scripts/work3.py",
+  //      "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+  //      "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "3{}",
+        },
+
+    "custom/work4": {
+        "on-click": "python3 ~/.config/scripts/work4.py",
+ //       "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+   //     "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "4{}",
+        },
+
+    "custom/work5": {
+        "on-click": "python3 ~/.config/scripts/work5.py",
+   //     "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+  //      "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "5{}",
+        },
+
+    "custom/work6": {
+        "on-click": "python3 ~/.config/scripts/work6.py",
+  //      "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+  //      "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "6{}",
+        },
+
+    "custom/work7": {
+        "on-click": "python3 ~/.config/scripts/work7.py",
+  //      "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+  //      "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "7{}",
+        },
+
+    "custom/work8": {
+        "on-click": "python3 ~/.config/scripts/work8.py",
+  //      "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+  //      "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "8{}",
+        },
+
+    "custom/work9": {
+        "on-click": "python3 ~/.config/scripts/work9.py",
+   //     "on-scroll-up": "python3 ~/.config/scripts/wayfire_work_next.py",
+  //      "on-scroll-down": "python3 ~/.config/scripts/wayfire_work_prev.py",
+        "tooltip": false,
+        "format": "9{}",
+        },
+        
+
+
+    "mpd": {
+        "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
+        "format-disconnected": "Disconnected ",
+        "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
+        "unknown-tag": "N/A",
+        "interval": 5,
+        "consume-icons": {
+            "on": " "
+        },
+        "random-icons": {
+            "off": "<span color=\"#f53c3c\"></span> ",
+            "on": " "
+        },
+        "repeat-icons": {
+            "on": " "
+        },
+        "single-icons": {
+            "on": "1 "
+        },
+        "state-icons": {
+            "paused": "",
+            "playing": ""
+        },
+        "tooltip-format": "MPD (connected)",
+        "tooltip-format-disconnected": "MPD (disconnected)"
+        },
+        
+    "tray": {
+        // "icon-size": 21,
+        "spacing": 10,
+        // "icons": {
+        //   "blueman": "bluetooth",
+        //   "TelegramDesktop": "$HOME/.local/share/icons/hicolor/16x16/apps/telegram.png"
+        // }
+        },
+
+
+    
+    "clock": {
+        // "timezone": "America/New_York",
+        "interval": 1,
+        "format": "  {:%H:%M}",
+        "format-alt": "  {:%B %d    %H:%M:%S}",
+        "on-click-middle": "gsimplecal",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "calendar": {
+                    "mode"          : "month",
+                    "mode-mon-col"  : 3,
+                    "on-scroll"     : 1,
+                    "on-click-right": "mode",
+                    "format": {
+                              "months":     "<span color='#5e81ac'><b>{}</b></span>",
+                              "days":       "<span color='#88c0d0'><b>{}</b></span>",
+                              "weekdays":   "<span color='#bb9af7'><b>{}</b></span>",
+                              "today":      "<span color='#c3e88d'><b><u>{}</u></b></span>"
+                              }
+                    }
+        },
+    
+    "cpu": {
+        "format": "{usage}%  ",
+        "interval": 8,
+        "tooltip": false
+        },
+        
+    "memory": {
+        "format": "{}% "
+        },
+        //
+    "temperature": {
+        "hwmon-path": "/sys/class/hwmon/hwmon2/temp2_input",
+        "critical-threshold": 60,
+        "interval": 8,
+        "format-critical": "{temperatureC}°C ",
+        "format": "{temperatureC}°C {icon}",
+        "format-icons": ["", "", ""]
+        },
+
+    "disk": {
+		"format": "  {}%",
+        "format-alt": "  {used} / {total} GiB",
+		"interval": 60,
+		"path": "/"
+		},
+		
+    "backlight": {
+        // "device": "acpi_video1",
+        "format": "{percent}% {icon}",
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
+        },
+
+    "battery": {
+        "states": {
+            "good": 90,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon} ",
+        "format-full": "{capacity}% {icon}",
+        "format-charging": "{capacity}%  ",
+        "format-plugged": "{capacity}%  ",
+        "format-alt": "{time} {icon} ",
+        // "format-good": "", // An empty format will hide the module
+        // "format-full": "",
+        "format-icons": ["", "", "", "", ""]
+        },
+        
+    "power-profiles-daemon": {
+        "format": "{icon}",
+        "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+        "tooltip": true,
+        "format-icons": {
+          "default": "",
+          "performance": "",
+          "balanced": "",
+          "power-saver": ""
+          }
+        },
+        
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": "Network   ({signalStrength}%)",
+        "format-ethernet": "{ipaddr}/{cidr} 󰈀 ",
+        "tooltip-format": "{ifname} via {gwaddr} 󰩟",
+        "format-linked": "{ifname} (No IP)  ",
+        "format-disconnected": "Disconnected 󰌙 ",
+        "format-alt": "{essid} ({signalStrength}%)",
+        "on-click-right": "nm-connection-editor"
+        },
+        
+    "pulseaudio": {
+        // "scroll-step": 1, // %, can be a float
+        "format": "{icon} {volume}% {format_source}",
+        "format-bluetooth": "{volume}% {icon} {format_source}",
+        "format-bluetooth-muted": " {icon} {format_source}",
+        "format-muted": " {format_source}",
+        "format-source": " {volume}%",
+        "format-source-muted": " ",
+        "format-icons": {
+            "headphone": " ",
+            "hands-free": "",
+            "headset": "",
+            "phone": " ",
+            "portable": " ",
+            "car": " ",
+            "default": ["", "", " "]
+            },
+        "on-click": "pavucontrol"    
+        },
+        
+    "custom/media": {
+        "format": "{icon} {text}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "spotify": "",
+            "default": "🎜"
+            },
+        "escape": true,
+        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
+        // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+        },
+        
+    "custom/power": {
+        "format" : " ",
+		"tooltip": false,
+		"on-click": "wlogout"
+		}
+    }
+
+    // Modules configuration
+    // "sway/workspaces": {
+    //     "disable-scroll": true,
+    //     "all-outputs": true,
+    //     "warp-on-scroll": false,
+    //     "format": "{name}: {icon}",
+    //     "format-icons": {
+    //         "1": "",
+    //         "2": "",
+    //         "3": "",
+    //         "4": "",
+    //         "5": "",
+    //         "urgent": "",
+    //         "focused": "",
+    //         "default": ""
+    //     }
+    // },
+
+}

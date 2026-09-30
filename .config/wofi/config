@@ -1,0 +1,13 @@
+mode=drun
+matching=fuzzy
+insensitive=true
+
+width=450
+height=270
+location=center
+
+allow_markup=true
+prompt=Search...
+hide_scroll=true
+no_actions=true
+show_all=false

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mkdir -p /var/cache/snooze
+exec snooze -s 1d -t /var/cache/snooze/btrbk -T 2d -- sh -c \
+	"btrbk run >> /var/log/btrbk-snooze.log 2>&1; touch /var/cache/snooze/btrbk"

@@ -1,0 +1,36 @@
+* {
+    font-family: CaskaydiaCoveNF;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 15
+}
+
+window {
+    background-color: rgba(26, 27, 38, 0.85);
+    border-radius: 0px;
+    border: 0px solid rgba(122, 162, 247, 0.8);   
+    }
+
+#outer-box {
+    padding: 8px;
+    }
+
+#input {
+    border-radius: 10px;
+    margin-bottom: 6px;
+    padding-left: 8px;
+}
+
+#entry {
+    padding: 3px;
+    padding-left: 7px;
+    border-radius: 8px;
+}
+
+
+/*
+#entry:selected {
+    background-color: rgba(100, 120, 255, 0.4);
+    color: #eee;
+}
+*/
