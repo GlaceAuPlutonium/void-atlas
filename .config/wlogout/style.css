@@ -1,0 +1,116 @@
+* {
+    background-image: none;
+    font-family: CaskaydiaCoveNF;
+    font-size: 26px;
+}
+
+window {
+    background-color: rgba(26, 28, 38, 0.7);
+}
+
+button {
+    color: #3B4252;
+    background-color: #2E3440;
+    outline-style: none;
+    border: none;
+    border-width: 0px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 10%;
+    border-radius: 0px;
+    box-shadow: none;
+    text-shadow: none;
+    animation: gradient_f 20s ease-in infinite;
+}
+
+button:focus {
+    color: #C0CAF5;
+    background-color: #2E3440;
+    background-size: 20%;
+    text-shadow: 0 0 4px #5883C9;
+}
+
+button:hover {
+    color: #3B4254;
+    background-color: #5883C9;
+    background-size: 25%;
+    border-radius: 75px;
+    animation: gradient_f 20s ease-in infinite;
+    transition: all 0.35s cubic-bezier(.55,0.0,.28,1.682);
+}
+
+
+
+button:hover#suspend {
+    background-image: image(url("/home/gap/.config/wlogout/icons/suspend-hover.png"), url("/usr/share/wlogout/icons/suspend.png"));
+    border-radius: 60px 60px 60px 5px;
+    margin : 5px 5px 5px 5px;
+}
+
+button:hover#logout {
+    background-image: image(url("/home/gap/.config/wlogout/icons/logout-hover.png"), url("/usr/share/wlogout/icons/logout.png"));
+    border-radius: 60px 60px 60px 60px;
+    margin : 5px 5px 5px 5px;
+}
+
+button:hover#shutdown {
+    background-image: image(url("/home/gap/.config/wlogout/icons/shutdown-hover.png"), url("/usr/share/wlogout/icons/shutdown.png"));
+    border-radius: 60px 60px 60px 60px;
+    margin : 5px 5px 5px 5px;
+}
+
+button:hover#reboot {
+    background-image: image(url("/home/gap/.config/wlogout/icons/reboot-hover.png"), url("/usr/share/wlogout/icons/reboot.png"));
+    border-radius: 5px 60px 60px 60px;
+    margin : 5px 5px 5px 5px;
+}
+
+button:hover#lock {
+    background-image: image(url("/home/gap/.config/wlogout/icons/lock-hover.png"), url("/usr/share/wlogout/icons/lock.png"));
+    border-radius: 60px 60px 5px 60px;
+    margin : 5px 5px 5px 5px;
+}
+
+button:hover#hibernate {
+    background-image: image(url("/home/gap/.config/wlogout/icons/hibernate-hover.png"), url("/usr/share/wlogout/icons/hibernate.png"));
+    border-radius: 60px 5px 60px 60px;
+    margin : 5px 5px 5px 5px;
+}
+
+
+
+#suspend {
+    background-image: image(url("/home/gap/.config/wlogout/icons/suspend.png"), url("/usr/share/wlogout/icons/suspend.png"));
+    border-radius: 4px 60px 4px 4px;    
+    margin : 5px 5px 5px 5px;
+}
+
+#logout {
+    background-image: image(url("/home/gap/.config/wlogout/icons/logout.png"), url("/usr/share/wlogout/icons/logout.png"));
+    border-radius: 4px 4px 4px 4px;    
+    margin : 5px 5px 5px 5px;
+}
+
+#shutdown {
+    background-image: image(url("/usr/share/wlogout/icons/shutdown.png"), url("/usr/share/wlogout/icons/shutdown.png"));
+    border-radius: 4px 4px 4px 4px;    
+    margin : 5px 5px 5px 5px;
+}
+
+#reboot {
+    background-image: image(url("/home/gap/.config/wlogout/icons/reboot.png"), url("/usr/share/wlogout/icons/reboot.png"));
+    border-radius: 4px 4px 60px 4px;    
+    margin : 5px 5px 5px 5px;
+}
+
+#lock {
+    background-image: image(url("/home/gap/.config/wlogout/icons/lock.png"), url("/usr/share/wlogout/icons/lock.png"));
+    border-radius: 60px 4px 4px 4px;    
+    margin : 5px 5px 5px 5px;
+}
+
+#hibernate {
+    background-image: image(url("/home/gap/.config/wlogout/icons/hibernate.png"), url("/usr/share/wlogout/icons/hibernate.png"));
+    border-radius: 4px 4px 4px 60px;    
+    margin : 5px 5px 5px 5px;
+}

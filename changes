@@ -1,0 +1,714 @@
+# Changes made on Void Linux to Vivobook S16 OLED M5606WA (AI9 HX370, Radeon 890M, 32GB LPDDR5X, 1TB Gen4)
+
+## CHANGELOG
+
+10/07 - Added 'LIBVA_DRIVER_NAME=radeonsi' in environment section of Niri's config.kdl for VA-API
+10/07 - Changed '04-config.sh' in repo to automatically reinstall whoosh Yazi plugin. (not done yet)
+10/07 - Created polkit rule to allow network changes without root :
+polkit.addRule(function(action, subject) {
+    if (action.id.indexOf("org.freedesktop.NetworkManager.") == 0 &&
+        subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+    }
+});
+
+10/07 - Installed Zed with manual command 'curl -f https://zed.dev/install.sh | sh'
+10/07 - Use 'resolvconf -u' for fixing "Temporary failure in name resolution"
+10/07 - Add 'session optional pam_rundir.so' in /etc/pam.d/system-login to define runtime directory XDG_RUNTIME_DIR at login. (should echo /run/user/1000)
+10/07 - Added bluez and enabled bluetoothd. Installed libva-bluetooth for Pipewire compat. Works fine.
+10/07 - Added 'xcursor-theme "phinger-cursors-light"' variable to Niri config.kdl for phingers cursor light usage.
+11/07 - Created polkit rule to authorize udisks2/udiskie automount. (NM rule with udisks2 instead of NetworkManager)
+11/07 - Installed "upower" to show battery level in Noctalia.
+11/07 - Added kernel parameter 'amd_pstate=active' and 'amd_pstate.dynamic_epp=1' for better power management.
+11/07 - Created udev rule to apply dynamic_epp at startup :
+SUBSYSTEM=="cpu", ACTION=="add", TEST=="/sys/devices/system/cpu/amd_pstate/dynamic_epp", RUN+="/bin/sh -c 'echo enabled > /sys/devices/system/cpu/amd_pstate/dynamic_epp'"
+
+11/07 - Installed 'mpv-mpris' and added 'scripts-append=/usr/lib/mpv-mpris/mpris.so' to .config/mpv/mpv.conf
+11/07 - Changed /etc/acpi/handler.sh, 'button/sleep' and 'button/lid' section, changed 'zzz' to 'setsid -f zzz' to solve system freeze on wakeup after lid closing.
+11/07 - Optimised GLSL shaders.
+12/07 - Changed AutoEnable=true to false in /etc/bluetooth/main.conf to prevent enabling at startup.
+12/07 - Created 'vesktop-flags.conf' for Wayland support :
+--ozone-platform-hint=auto
+--ozone-platform=wayland
+
+13/07 - Created /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf :
+[connection]
+wifi.powersave=2
+
+14/07 - Added 'pcie_aspm=force' kernel parameter to GRUB config. Monitor system for unusual PCIe devices behavior.
+15/07 - Added line to /etc/fstab for automounting debugfs :
+debugs /sys/kernel/debug debugfs defaults 0 0
+
+16/07 - Added useless modprobe options to /etc/modprobe.d/mt****.conf to attempt wifi fix (aint working bruh)
+19/07 - Changed Exec line to 'dbus-run-session /usr/bin/niri --session' on niri.desktop so that the greeter can launch
+19/07 - Edited /etc/greetd/config.toml for launching Noctalia-greeter :
+[terminal]
+vt = 1
+
+[default_session]
+command = "/usr/local/bin/noctalia-greeter-session -- --session niri"
+user = "_greeter"
+
+WARNING : On reinstallation/forced-reconfiguration, greetd revokes ALL manually added groups to '_greeter' user, leaving only _greeter and video.
+          May fuck up and causes seatd socket permission errors on startup, may need to re-add _seatd group.
+WARNING : Noctalia-greeter NEEDS wlroots0.20 to work properly (else the almitghy greetd blinking cursor bug)
+19/07 - Modified /var/lib/noctalia-greeter/greeter.toml with [keyboard].layout="fr" and [cursor].theme="phinger-cursors-light"
+19/07 - Installed 'dumb_runtime_dir' and removed 'pam_rundir', removed pam_rundir line in /etc/pam.d/system-login, uncommented dumb_rundir line.
+        Pam_rundir is buggy and unmaintained and would sometimes remove rundir at logout.
+20/07 - Created udev rule /etc/udev/rules.d/70-battery-charge-threshold.rules to limit battery charging to 80% :
+SUBSYSTEM=="power_supply", KERNEL=="BAT1", ATTR{charge_control_end_threshold}="80"
+
+22/07 - Fixed power issues, turns out greetd/noctalia-greeter was eating through my battery, disabling the service allowed wattages to go back to normal.
+22/07 - Edited rc.local to limit battery charging to 80% (instead of udev rule, cleaner) :
+echo 80 > /sys/class/power_supply/BAT1/charge_control_end_threshold
+
+22/07 - Removed dynamic-epp udev rules ; edited rc.local to activate it :
+echo "enabled" > /sys/devices/system/cpu/amd_pstate/dynamic_epp
+
+26/07 - Configured BTRFS subvolumes (see bottom for details). Edited fstab to add noatime/compress=zstd:3, added 'rootflags=subvol=@' param to cmdline and regen grub/initramfs
+WARNING : Had to redo grub-install after subvolumes config else 'normal.mod' not found.
+
+27/07 - Installed btrbk for BTRFS snapshots, created /mnt/btr_pool, modified fstab : 'UUID=xxxx /mnt/btr_pool btrfs rw,noatime,subvol 0 0', created /etc/btrbk.conf :
+snapshot_preserve_min   3d
+snapshot_preserve       21d
+volume /mnt/btr_pool
+    snapshot_dir @snapshots
+    subvolume @
+    subvolume @home
+
+27/07 - Installed 'snooze' for automatic snapshots, NOT CONFIGURED YET JUST INSTALLED
+27/07 - Installed Steam
+WARNING : LIMIT STEAM DOWNLOAD SPEED ELSE THE WIFI CARD HAS A STROKE AND LAPTOP NEEDS TO BE RESTARTED.
+
+28/07 - Installed 'gamemode' to correctly set GPU DPM and optimisations at game startup. Added user to 'gamemode' group.
+        Set 'gamemoderun %command%' in Steam startup option. Created /etc/gamemode.ini :
+[general]
+desiredgov=performance
+desiredprof=performance
+igpu_desiredgov=powersave
+igpu_power_threshold=0.3
+softrealtime=off
+renice=0
+ioprio=0
+inhibit_screensaver=0
+disable_splitlock=1
+[gpu]
+apply_gpu_optimisations=accept-responsibility
+gpu_device=0
+amd_performance_level=high
+
+28/07 - Added "shift:breaks_caps" xkb option to config.kdl to disable Capslock with Shift
+03/08 - Updated to 7.1.5. (from 7.1.3)
+03/08 - Installed 'socklog' and 'socklog-void'. Enabled 'socklog-unix' and 'nanoklogd' services.
+03/08 - Installed 'wireless-regdb' package. "echo 'install_items+=" /usr/lib/firmware/regulatory.db /usr/lib/firmware/regulatory.db.p7s "' | sudo tee /etc/dracut.conf.d/90-regulatory-db.conf"
+        Then regenerated initramfs, now defaults to FR reg domain.
+
+07/08 - Installed Heroic Games Launcher, Project Zomboid (crack), Darkwood, Viewfinder and Filament. AoE2DE crack won't work
+08/08 - Updated to 7.1.7 from 7.1.5
+08/08 - DO NOT USE 7.1.7 HEAVY GPU ARTIFACT ON ELEMENT REFRESH IT LOOKS LIKE THE GPU IS DYING
+09/08 - Changed 'GRUB_DEFAULT="gnulinux-advanced-db71039f-6ab9-4eae-89c0-f7aa6127798e>gnulinux-7.1.5_1-advanced-db71039f-6ab9-4eae-89c0-f7aa6127798e"' in /etc/default/grub to default to 7.1.5
+11/08 - Added 'echo 1 > /sys/power_pm_debug_messages' to rc.local to help debugging.
+11/08 - Removed pcie_aspm=force in kernel cmdline because it MIGHT actually have been fucking up s2idle since MT7922 is the like the most annoying thing on the whole fucking planet. see how that goes.
+13/08 - Updated to 7.1.8 from 7.1.5. 7.1.8 fixes amdgpu artifacting issue. Removed previous GRUB_DEFAULT value.
+13/08 - Added 'PYTHONPYCACHEPREFIX "/home/gap/.cache/pycache"' to Niri config.kdl to accelerate kitty startup.
+        Python was recompiling every single time, went from 640ms to 185ms.
+13/08 - Sped up ZSH startup. Bundled antidote into (and source .zsh_plugins.zsh directly) and optimised compinit startup, went from 30ms to 12.7ms :
+autoload -Uz compinit
+if [[ -n ${HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+14/08 - BREAKING NEWS! NO DEADLOCK IF : Manually zzz (kitty or noctalia) then close lid. Wakes up normally afterward.
+22/08 - Changed glibc locales used in /etc/locale.conf, everything set to fr_FR.UTF-8, 'LC_LANG' is set to en_US.UTF-8.
+22/08 - Setup snooze for regular btrfs snapshots. Created snooze-btrbk service with following run file, then activated the service :
+#!/bin/sh
+mkdir -p /var/cache/snooze
+exec snooze -s 1d -t /var/cache/snooze/btrbk -T 3d -- sh -c \
+	"btrbk run >> /var/log/btrbk-snooze.log 2>&1; touch /var/cache/snooze/btrbk"
+
+23/08 - Blacklisted a bunch of directories in .config/zed/settings.json to limit scanning at startup, went from 90°C/40W to 56°C/15W
+23/08 - Mod+Shift+L now sends window to last workspace (useful for media stuff ie. discord/spotify)
+28/08 - Installed 'uv' and Marimo.
+28/08 - Installed 'typst' and Quarto from tarball. (note: quarto is bundled with typst, xbps install for separate typst use)
+30/08 - Installed marimo-quarto, learnt how to configure project file:
+mkdir project && cd project
+quarto create-project .
+--- IF PYTHON NEEDED
+uv init
+uv add marimo
+quarto add marimo-team/marimo-quarto
+
+09/09 - Installed Tracker through wine in .local/share/wineprefixes/tracker.
+        Export WINEPREFIX and export JAVA_TOOL_OPTIONS="-Dsun.java2d.uiScale=1.7" at startup (custom file in .local.bin)
+17/09 - Changed "-T 3d" to "-T 2d" in snooze-btrbk run script, so it backup every 3 days instead of every 4 days like it was doing
+18/09 - Compiled noctalia-qs-0.0.12_2.xbps due to broken qt6.11.2 API librairie. Works fine.
+22/09 - Found how to type emojis : just ctrl+c. Noctalia paste emojis into the clipboard.
+24/09 - FINALLY installed Visor Boot Manager (cloned and built from repo). Started tweaking boot.conf.
+25/09 - Baked CaskaydiaCove into the Visor EFI.
+26/09 - Modify Visor' src to fix unwated blurring behavior/bug. [ADD THE DIFF HERE] Recompiled.
+        Fix edge blurriness/uneven rounding by removing the feather function in the draw_frost function.
++#define FROST_TINT_A 60
++#define FROST_LIFT 8
++#define FROST_FILL 255
++
+ static UINTN blur_pick_shift(UINTN w) {
+     UINTN s = 2;
+     while ((w >> s) > 640 && s < 5) s++;
+@@ -206,10 +210,9 @@
+     int have_blur = (state->blur_cache && state->blur_line && state->blur_valid &&
+                      w <= (INTN)state->screen_width);
+     UINT32 flat = color_to_u32(state->bg_color);
+-    INTN base_fill = clear ? (a * 255 / 255) : (a * 220 / 255);
+-    INTN tint_a = clear ? 0 : 34;
+-    INTN lift   = clear ? 0 : 8;
+-    INTN feather = 10;
++    INTN base_fill = clear ? a : (a * FROST_FILL / 255);
++    INTN tint_a = clear ? 0 : FROST_TINT_A;
++    INTN lift   = clear ? 0 : FROST_LIFT;
+     for (INTN j = 0; j < h; j++) {
+         INTN inset = 0;
+         if (j < r)            { INTN dy = r - 1 - j; INTN q = r*r - dy*dy; inset = r - (INTN)isqrt_(q > 0 ? q : 0); }
+@@ -217,16 +220,11 @@
+         INTN yy = y + j;
+         if (yy < 0 || yy >= (INTN)state->screen_height) continue;
+         if (have_blur) blur_fill_line(state, yy, x, w);
+-        INTN edy = (j < h - 1 - j) ? j : (h - 1 - j);
+         for (INTN i = inset; i < w - inset; i++) {
+             INTN xx = x + i;
+             UINT32 *p = get_pixel(state, xx, yy);
+             if (!p) continue;
+-            INTN edx = (i - inset < (w - inset - 1) - i) ? (i - inset) : ((w - inset - 1) - i);
+-            INTN ed = (edx < edy) ? edx : edy;
+             INTN fill_a = base_fill;
+-            if (ed < feather) fill_a = base_fill * ed / feather;
+-            if (fill_a <= 0) continue;
+             UINT32 src = have_blur ? state->blur_line[i] : flat;
+             INTN sr = (src >> 16) & 0xFF, sg = (src >> 8) & 0xFF, sb = src & 0xFF;
+             sr += lift; sg += lift; sb += lift;
+
+26/09 - Set up a quick qemu VM to boot up Visor and test config file. Added user tp kvm group.
+        Use GDK_BACKEND=x11 envvar to avoid unwanted resolution based off GTK's window at QEMU reboot.
+
+28/09 - Added a new 20-uki hook in /etc/kernel.d/post-install to auto-generate UKI at kernel update and modify Visor config.
+        Added cmdline.conf to /etc/dracut.conf.d to set kernel-cmdline parameters.
+PKGNAME="$1"
+VERSION="$2"
+
+[ -x usr/bin/dracut ] || exit 0
+
+UKIDIR="boot/efi/EFI/Linux"
+BOOTCONF="boot/efi/EFI/visor/boot.conf"
+SHORT="${VERSION%%_*}"                  # 7.x.x_1 -> 7.x.x
+UKI="linux-${SHORT}.efi"
+
+usr/bin/dracut --force --uefi "$UKIDIR/$UKI" ${VERSION} || exit $?
+
+[ -f "$BOOTCONF" ] || exit 0
+cp -f "$BOOTCONF" "$BOOTCONF.bak" || exit 1
+sed \
+	-e '/^[[:space:]]*name[[:space:]]*=[[:space:]]*"Void /s|"Void [^"]*"|"Void '"$SHORT"'"|' \
+	-e '/^[[:space:]]*kernel[[:space:]]*=.*Linux.linux-/s|linux-[^[:space:]]*\.efi|'"$UKI"'|' \
+	"$BOOTCONF" > "$BOOTCONF.new" || { rm -f "$BOOTCONF.new"; exit 1; }
+
+# replace boot.conf if new uki is there (useless or nah ??)
+if grep -q "$UKI" "$BOOTCONF.new"; then
+	mv -f "$BOOTCONF.new" "$BOOTCONF"
+else
+	echo "20-initramfs: boot.conf not modified (new uki not found)" >&2
+	rm -f "$BOOTCONF.new"
+	exit 1
+fi
+
+28/09 - Finally done with the VisorBootManager and UKI config.
+
+
+
+--
+
+
+
+
+
+## TODO
+
+Make the dots and publish ts on github (or gitlab ? or codeberg ? or sourcehut ? or my own repo ? or something else
+
+EDID/MLCK fix (on pause for now, annoying)
+Power profiles (ppd or tlp)
+Fan profiles not powerful enough when plugged in ? cuz high temps (no pp/tlp yet), so see fan controls (prolly ayuz)
+
+Ayuz for ghelper in Linux (not in repo, might be hell to compile asus-ctl then ayuz)
+brightness/sound with touchpad (with ayuz ?) / already "configured" zones, sides of the trackpad not working, hardware-level control ?
+No session lock on lid closing/manual suspend (manually, lock from noctalia's zzz)
+Some nerdfont emojis not showing up in Zed and Noctalia (at least clipboard history)
+Noctalia-greeter power buttons (reboot/poweroff) ain't working (prob wrong command ?) (nectoalia-greeter removed for now)
+why is noctalia-greeter/greetd eating through my battery when its enabled ? (login from tty for now)
+Check ly greeter
+Sudo permissions/auth with yazi ?
+Basically recheck every single yazi plugin possible
+HDR ? brighter screen ? (out of curiosity)
+60Hz feels sluggish ? not feeling like 60Hz
+60Hz/120Hz
+External monitor support/config etc..
+Screen always at 40% on startup ? Why ??
+    Actually: Screen starts off at 40% brightness (physically, i can see it). But computer thinks it's at 50%.
+    So when i press my key to lower by 5% (to get to 35%), computer thinks it's at 50% to it lowers to 45%, meaning my brightness actually get higher.
+    Need to press my key again to lower to 40% like at startup and more to lower more.
+Can't press Enter in file choosing (GTK popup) to validate (also sometimes window opening in fs float, a way to reduce the size ?)
+libreoffice highdpi scaling problem
+    blurry cursor -> x11/xwayland related ?
+Revise complicated Niri bindings
+What is being used, ntfs-3g or new 7.0 ntfs3 driver ?
+in-depth zed config (prolly crapton of things i don't need)
+install mpd for music maybe ?
+See whats small games to install on here, top of mind : Minecraft (prism), AoE2DE (crack, wont work), Linux native games
+Do I install my astro-processing softwares ? (siril, graxpert, stellarium, etc..)
+What software to install for college notes/stuff ? (logseq may be goofy, see other os alternatives)
+only sometimes the USB4.0 port won't charge ?? (not recognized as plugged in), only seems to happen after a zzz happened, works fine when pluggin at startup
+Fuckass lid crashing problem (probably double acpi close events being sent; handler.sh doesn't check for running zzz process) (no big deal now)
+Install noctalia v5 (bottom priority) (goofy ass control center)
+Installing an LLM that would run efficiently on the laptop ? Also bottom priority²
+"replace" gcc with clang (partly, frontend) and ninja with samurai
+See if i can change Firefox theme once battery is connected (just for fun)
+
+PROBLEMS (not now):
+MCLK EDID fix not working
+Wifi hell
+    Edit on 11/09- why the fuck does wavemon shows the wifi being at 0dBm (1.00 mW) (connected on hotspot)
+    No disable_clc mentionned in dmesg despite being mentionned in /etc/modprobe.d/mt7921.conf
+
+
+check whatever is on the arch wiki page (but normally wrote down everything) : https://wiki.archlinux.org/title/ASUS_Zenbook_UM5606
+
+
+
+
+
+Laptop freezing when on zzz (lid closed) for too long.
+Example on 23/07 : Laptop stayed closed for 2h15 (11h-13h15), on wakeup is unresponsive (keeb is lighting on), stuck on blackscreen.
+Same symptoms as previous zzz (before patch on /etc/acpi/handler.sh on 11/07, would suffer the same symptoms as soon as now, but as soon as lid is closed instead of having to wait a few hours.
+Do note that Niri automatially turns screen on/off based of lid position, although shouldn't really matter here
+On 25/07 - Closed lid while playing music, unplugged headphones while closed. Reopened 2min later : black screen, unresponsive, as usual. But weird because this time it was fast.
+On 25/07 - Closed lid with nothed opening, no unplugging during zzz, left it for almost 3h, opened it just fine, no blackscreen/crash
+On 28/07, closed lid from 7h31 to 8h14, without ANYTHING running, yet deadlock on resume
+08/08, closed lid, had Firefox + Yazi, connected to internet, deadlock on resume
+On 13/08, closed lid, just firefox. Weird because the day before ran 'crashlogs' tests, ran 5 consecutive successful close lid ON BATTERY, just like this
+Tests (end of july):
+Headphone in, not playing music. Lid closing, wait 20s, open, works fine.
+Headphone in, music playing. Lid closing, wait 20s, open, deadlock.
+Headphone in, not playing music. Lid closing, unplug jack, wait 20s, open, works fine.
+Headphone out, not playing music, works fine.
+Heaphone out, playing music. Lid closing, wait 20s, open, works fine.
+As usual, headphone in, playing music, lid closing, unplug, wait 20s, deadlock.
+Just got a god knows why the fuck its doing this weird ass deadlock, literally didn't do anything, just closed the lid back after like 10s.
+Actually its fucking random I just closed it with Zed opened, no music, for like 5min, and deadlock on wakeup.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## THE WIFI NIGHTMARE SERIOUSLY WHAT THE FUCK IS THIS
+
+FIND A WAY TO FIX THIS FUCKING WIFI BRUH (prolly broken forever :wilted_rose:) :
+
+Résumé du debug WiFi mt7921/mt7922 — TX power bloqué à 3dBm
+Symptôme de départ : signal catastrophique dans la chambre (12m, pings 6-7000ms), wavemon révèle tx power: 3dBm au lieu des 15-20dBm attendus.
+Pistes testées et résultats
+
+iw phy set txpower fixed → ignoré silencieusement. Confirme que le plafond est appliqué en profondeur, pas contournable en userspace.
+iw reg set FR → sans effet, reste country 00. Écarté comme cause : le domaine "00" autorise déjà jusqu'à 20dBm en 2.4GHz.
+txpower_sku (debugfs) → révèle la vraie structure : eeprom (calibration puce) = valeurs saines 37-41 ; tmac (limite réellement appliquée par le firmware) = 3 partout, sur tous les débits, toutes largeurs de bande. Fichier en lecture seule, pas de test rapide possible par simple echo.
+Test terrain (proximité box vs chambre vs hotspot) → tmac reste à 3 peu importe le contexte réseau. Élimine l'hypothèse d'un algorithme de puissance adaptatif (TPC) qui réagirait mal à la distance — c'est un plafond fixe et statique.
+disable_clc=1 sur mt7921_common (bug CLC documenté sur Debian, cas quasi identique ASUS Vivobook S14/MT7922) → paramètre correctement chargé (vérifié via /sys/module/.../parameters/disable_clc = Y, initramfs régénéré, confirmé present dans l'image), mais aucun effet sur tmac. Conclusion : le bug CLC de ce rapport ne s'applique pas à notre cas précis (probablement une régression firmware différente, notre WM Firmware datant de juin 2026 vs mai 2025 pour le cas Debian).
+Dynamic debug kernel sur mt76 → aucun point de debug disponible pour SAR spécifiquement (pas assez de hooks pr_debug dans cette version).
+Décompilation DSDT (acpidump + iasl) → découverte de deux mécanismes distincts :
+
+Un mécanisme SAR propriétaire ASUS via ALIB/WMI (Method SARC → appelle ALIB(0x0C, ...)), différent du DSM standard.
+Les vraies méthodes ACPI que le driver mt76 sait lire : MTDS, MTGS, MTCL, MTAS, MTFG, MTSP, toutes présentes sous \_SB_.PCI0.GPP5.WLAN. Donc le mécanisme attendu par le driver existe bien sur cette machine.
+
+
+Décodage partiel de MTDS → table SAR réelle avec des limites autour de 13dBm/10dBm/8.5dBm selon les modes. Bas, mais pas aussi bas que 3dBm — donc même si cette table s'applique intégralement, elle n'explique pas entièrement le plafond observé.
+Appels ACPI live via acpi_call (MTFG, MTAS, MTSP) → toutes répondent avec des données structurées, confirmant que les méthodes sont vivantes et répondent. Décodage octet par octet non poussé jusqu'au bout (recherche de la structure exacte du parsing driver infructueuse).
+Recherche du bug "use-after-free in mt7921_acpi_read()" → correctif ancien (2022-2023), très probablement déjà mergé dans le kernel 7.1.3 (2026). Piste abandonnée.
+Dump mémoire EC brute (ec_sys) → découverte d'un bit nommé SARF ("SAR Feature") à l'offset 0xC0, actuellement à 0 (dans l'octet 0x60). Test d'écriture envisagé puis abandonné pour raisons de sécurité matérielle (risque rare mais réel de freeze/comportement erratique/dans le pire cas dégât matériel).
+
+Conclusion actuelle
+Le mécanisme ACPI SAR attendu par le driver existe et répond, mais soit sa table ne suffit pas à expliquer tmac=3, soit il y a un bug de parsing non identifié dans le driver ou le firmware WM (juin 2026) sur cette combinaison ASUS/MT7922 précise. Pas de bug public documenté correspondant exactement à ce cas. Décision : contournement matériel (répéteur/point d'accès dans la chambre, ou Ethernet) plutôt que poursuivre l'investigation sur un terrain à risque (EC) ou incertain (recompilation/patch driver).
+
+
+
+udevgate (we can forget about this) :
+After UDEV battery rule applied :
+SUPER HIGH consumption/temps after resume for a long time (80°C + 30-35W consummed) when opening the lid + Noctalia battery tooltip suddenly refreshing a lot faster ?
+Weird reboot (see above), still super hot, 35W (instead of like 8-9 idle) and fans ramping up like crazy
+Removed udev battery rule, after a few dozens of seconds fan stops, temps go back normal (53°C), wattage goes down to 15-16W (still a bit high for what i used to get wiht just zed/kitty opened) and noctalia tooltip stopped refreshing every fucking second
+Restarted after this, normal behavior, wattage a bit high at startup (15W) slowly settles down to around 10W (instead of like 9-8.5)
+Started Zed to writes this, instantly ramps up to fucking 80°C and 35W just to start it, slowly cools down to 15-16W, usually around 13-14 when starting Zed and doing some stuff
+Not normal, because usually, AND I INSIST ON THIS : even with Firefox/Zed/kitty instances/music playing through MPV, it stays around 13-14W without a problem.
+PPowered off + manual boot, still too high at startup (16-17W) then ramps up to fucking 30W just to start Zed
+Just did manual reset (press power button for 40s), reboot, same problem, like 19W at startup and 35-40W when starting Zed, fan ramping up and down often, idling back down to 15W approx (instead of lower usually)
+Also the manual reset wiped the hardware clock so now it thinks its 2am in april 2025 (instead of like 6pm in july 2026) and i can't connect to claude
+
+And turns out it was just greetd running in the background and eating the battery
+
+
+
+
+
+
+
+
+
+
+
+## BTRFS subvolumes setup
+
+mount -o subvolid=5 /dev/XXX /mnt
+btrfs subvolume snapshot /mnt /mnt/@        // clones root into @
+btrfs subvolume create /mnt/@home
+btrfs subvolume create /mnt/@snapshots
+cp -a --reflink=always /mnt/@/home/. /mnt/@home/
+rm -rf /mnt/@/home/*
+rm -rf /mnt/@/home/.[!.]* 2>/dev/null
+mkdir -p /mnt/@/home /mnt/@/.snapshots      // for future mountpoints
+
+mkdir /mnt/old_root_backup
+mv /mnt/boot /mnt/old_root_backup/
+mv /mnt/etc /mnt/old_root_backup/
+mv /mnt/home /mnt/old_root_backup/
+mv /mnt/root /mnt/old_root_backup/
+mv /mnt/usr /mnt/old_root_backup/
+mv /mnt/var /mnt/old_root_backup/
+mv /mnt/opt /mnt/old_root_backup/
+mv /mnt/srv /mnt/old_root_backup/
+
+mv /mnt/bin /mnt/old_root_backup/
+mv /mnt/sbin /mnt/old_root_backup/
+mv /mnt/lib /mnt/old_root_backup/
+mv /mnt/lib64 /mnt/old_root_backup/         // basically moves everything from /mnt into backup (non user-merged first)
+
+umount -R /mnt
+mount -o subvol=@,$OPT /dev/XXX /mnt
+mount -o subvol=@home,$OPT /dev/XXX /mnt/home
+mount -o subvol=@snapshots,$OPT /dev/XXX /mnt/.snapshots
+mount /dev/YYY /mnt/boot/efi
+
+xgenfstab /mnt > /mnt/etc/fstab
+Edit /etc/fstab to have all options : ssd,discard=async,space_cache=v2,noatime,compress=zstd:3
+
+xchroot /mnt
+Add 'rootflags=subvol=@' kernel parameter to GRUB, then regen GRUB config/initramfs.
+GRUB itself needs to be reinstalled through grub-install to lever the exact mountpoint change. Else 'error: /boot/grub/x86_64/normal.mod not found'.
+
+exit, umount -R /mnt, reboot
+
+
+
+
+
+
+## Installing 32bit GPU drivers :
+
+❯ sudo xbps-install mesa-dri-32bit vulkan-loader-32bit mesa-vulkan-radeon-32bit mesa-vaapi-32bit libvdpau-va-gl-32bit
+
+Name                     Action    Version           New version            Download size
+libxcrypt-compat-32bit   install   -                 4.4.38_1               95KB
+glibc-32bit              install   -                 2.41_1                 7994KB
+libXau-32bit             install   -                 1.0.12_2               5991B
+libXdmcp-32bit           install   -                 1.1.5_1                10KB
+libxcb-32bit             install   -                 1.17.0_1               233KB
+libX11-32bit             install   -                 1.8.13_1               728KB
+libglvnd-32bit           install   -                 1.7.0_1                245KB
+libXext-32bit            install   -                 1.3.7_1                30KB
+libXxf86vm-32bit         install   -                 1.1.6_2                9127B
+libpciaccess-32bit       install   -                 0.19_1                 19KB
+libdrm-32bit             install   -                 2.4.134_1              163KB
+expat-32bit              install   -                 2.8.2_1                78KB
+ncurses-libs-32bit       install   -                 6.5_2                  338KB
+libedit-32bit            install   -                 20260512.3.1_1         96KB
+libffi-32bit             install   -                 3.3_2                  17KB
+libgcc-32bit             install   -                 14.2.1+20250405_4      103KB
+libstdc++-32bit          install   -                 14.2.1+20250405_4      953KB
+libicu78-32bit           install   -                 78.3_1                 2613KB
+liblzma-32bit            install   -                 5.8.3_1                115KB
+libreadline8-32bit       install   -                 8.2.010_1              146KB
+zlib-32bit               install   -                 1.3.1_1                53KB
+libxml2-32bit            install   -                 2.13.8_3               639KB
+gmp-32bit                install   -                 6.3.0_1                259KB
+libz3-32bit              install   -                 4.15.8_1               12MB
+libzstd-32bit            install   -                 1.5.7_1                334KB
+libllvm21-32bit          install   -                 21.1.7_1               39MB
+bzip2-32bit              install   -                 1.0.8_2                34KB
+libelf-32bit             install   -                 0.195_1                361KB
+libsensors-32bit         install   -                 3.6.0_2                25KB
+libxshmfence-32bit       install   -                 1.3.3_2                3836B
+mesa-libgallium-32bit    install   -                 26.1.5_1               12MB
+libgbm-32bit             install   -                 26.1.5_1               7366B
+eudev-libudev-32bit      install   -                 3.2.14_2               82KB
+wayland-32bit            install   -                 1.26.0_1               67KB
+mesa-32bit               install   -                 26.1.5_1               807KB
+mesa-dri-32bit           install   -                 26.1.5_1               21KB
+vulkan-loader-32bit      install   -                 1.4.341.0_1            171KB
+mesa-vulkan-radeon-32bit install   -                 26.1.5_1               4048KB
+mesa-vaapi-32bit         install   -                 26.1.5_1               819B
+libXfixes-32bit          install   -                 6.0.2_1                9224B
+libva-32bit              install   -                 2.22.0_1               90KB
+libvdpau-va-gl-32bit     install   -                 0.4.2_2                77KB
+
+Size to download:               83MB
+Size required on disk:         289MB
+Space available on disk:       793GB
+
+Do you want to continue? [Y/n]
+
+
+## Installing steam :
+
+❯ sudo xbps-install -S steam                                                                      3s
+
+Name                      Action    Version           New version            Download size
+aalib                     install   -                 1.4rc5_3               38KB
+giflib                    install   -                 5.2.2_1                23KB
+libid3tag                 install   -                 0.16.4_1               35KB
+libspectre                install   -                 0.2.12_1               28KB
+imlib2                    install   -                 1.12.6_2               228KB
+libcaca                   install   -                 0.99.beta20_1          270KB
+taglib                    install   -                 2.3.1_1                521KB
+twolame                   install   -                 0.4.0_2                54KB
+libwavpack                install   -                 5.9.0_1                91KB
+gst-plugins-good1         install   -                 1.28.5_1               2648KB
+bubblewrap                install   -                 0.11.2_1               -
+xdg-dbus-proxy            install   -                 0.1.7_1                26KB
+libavif                   install   -                 1.4.2_1                321KB
+enchant2                  install   -                 2.8.14_1               45KB
+hyphen-en                 install   -                 26.2.0.3_1             94KB
+hyphen                    install   -                 2.8.8_4                16KB
+libmanette                install   -                 0.2.6_1                32KB
+libsecret                 install   -                 0.21.7_1               165KB
+gsettings-desktop-schemas install   -                 48.0_1                 -
+glib-networking           install   -                 2.80.1_1               158KB
+libsoup3                  install   -                 3.6.6_1                1623KB
+libwoff2common1.0.2       install   -                 1.0.2_1                4072B
+libwoff2dec1.0.2          install   -                 1.0.2_1                19KB
+libwebkitgtk60            install   -                 2.50.4_1               40MB
+zenity                    install   -                 4.0.5_1                3192KB
+liberation-fonts-ttf      install   -                 2.1.5_3                1691KB
+lsof                      install   -                 4.99.7_1               137KB
+steam-udev-rules          install   -                 1.0.0.61+20230830_1    3111B
+steam                     install   -                 1.0.0.85_1             19MB
+
+Size to download:               70MB
+Size required on disk:         181MB
+Space available on disk:       792GB
+
+Do you want to continue? [Y/n]
+
+
+Installing WINE32BIT
+
+Name                          Action    Version           New version            Download size
+libXi-32bit                   install   -                 1.8.2_2                33KB
+libXinerama-32bit             install   -                 1.1.6_1                4442B
+libXcomposite-32bit           install   -                 0.4.7_2                4467B
+libXrender-32bit              install   -                 0.9.12_1               20KB
+libXcursor-32bit              install   -                 1.2.3_2                22KB
+nettle-32bit                  install   -                 3.10.2_1               376KB
+libunistring-32bit            install   -                 1.0_1                  596KB
+libidn2-32bit                 install   -                 2.3.8_1                137KB
+libtasn1-32bit                install   -                 4.21.0_2               43KB
+p11-kit-32bit                 install   -                 0.26.4_1               653KB
+libcrypto3-32bit              install   -                 3.6.3_1                2015KB
+libssl3-32bit                 install   -                 3.6.3_1                479KB
+libevent-32bit                install   -                 2.1.13_1               221KB
+libsodium-32bit               install   -                 1.0.22_1               251KB
+libunbound-32bit              install   -                 1.25.2_1               553KB
+gnutls-32bit                  install   -                 3.8.13_1               989KB
+libXrandr-32bit               install   -                 1.5.4_1                19KB
+libXScrnSaver-32bit           install   -                 1.2.4_1                5666B
+alsa-lib-32bit                install   -                 1.2.16.1_1             535KB
+libpng-32bit                  install   -                 1.6.58_1               118KB
+brotli-32bit                  install   -                 1.2.0_2                366KB
+freetype-32bit                install   -                 2.14.3_1               396KB
+fontconfig-32bit              install   -                 2.17.1_1               151KB
+pixman-32bit                  install   -                 0.46.4_1               305KB
+libblkid-32bit                install   -                 2.41.4_1               185KB
+libmount-32bit                install   -                 2.41.4_1               220KB
+libpcre2-32bit                install   -                 10.47_1                588KB
+glib-32bit                    install   -                 2.88.0_1               1544KB
+lzo-32bit                     install   -                 2.10_3                 55KB
+cairo-32bit                   install   -                 1.18.4_2               641KB
+dbus-libs-32bit               install   -                 1.16.2_2               150KB
+libdav1d-32bit                install   -                 1.5.3_1                393KB
+libjpeg-turbo-32bit           install   -                 3.1.4.1_1              280KB
+libsharpyuv-32bit             install   -                 1.6.0_3                12KB
+libwebp-32bit                 install   -                 1.6.0_3                286KB
+jbigkit-libs-32bit            install   -                 2.2_2                  30KB
+tiff-32bit                    install   -                 4.7.1_2                229KB
+gdk-pixbuf-32bit              install   -                 2.42.12_2              142KB
+fribidi-32bit                 install   -                 1.0.16_1               26KB
+libdatrie-32bit               install   -                 0.2.14_1               16KB
+libthai-32bit                 install   -                 0.1.29_1               18KB
+graphite-32bit                install   -                 1.3.14_1               84KB
+libharfbuzz-32bit             install   -                 14.3.0_1               1227KB
+pango-32bit                   install   -                 1.56.3_2               254KB
+librsvg-32bit                 install   -                 2.59.2_2               2305KB
+libXdamage-32bit              install   -                 1.1.7_1                4704B
+atk-32bit                     install   -                 2.56.5_1               52KB
+libXtst-32bit                 install   -                 1.2.5_2                11KB
+at-spi2-core-32bit            install   -                 2.56.5_1               90KB
+at-spi2-atk-32bit             install   -                 2.56.5_1               76KB
+lcms2-32bit                   install   -                 2.19.1_1               185KB
+libusb-32bit                  install   -                 1.0.29_1               59KB
+json-glib-32bit               install   -                 1.10.8_1               64KB
+libgusb-32bit                 install   -                 0.4.9_1                38KB
+libcolord-32bit               install   -                 1.4.7_1                190KB
+avahi-libs-32bit              install   -                 0.8_2                  141KB
+libxcrypt-32bit               install   -                 4.4.38_1               95KB
+libcups-32bit                 install   -                 2.4.19_1               277KB
+libepoxy-32bit                install   -                 1.5.10_1               259KB
+libxkbcommon-32bit            install   -                 1.13.2_1               177KB
+gtk+3-32bit                   install   -                 3.24.52_1              3292KB
+libdecor-32bit                install   -                 0.2.5_1                46KB
+libICE-32bit                  install   -                 1.1.2_1                47KB
+libuuid-32bit                 install   -                 2.41.4_1               18KB
+libSM-32bit                   install   -                 1.2.6_1                16KB
+libasyncns-32bit              install   -                 0.8_9                  9148B
+libcap-32bit                  install   -                 2.78_1                 26KB
+libelogind-32bit              install   -                 252.39_1               248KB
+libgomp-32bit                 install   -                 14.2.1+20250405_4      160KB
+libfftw-32bit                 install   -                 3.3.11_1               1300KB
+libogg-32bit                  install   -                 1.3.6_1                21KB
+celt-32bit                    install   -                 0.11.3_3               50KB
+libdb-32bit                   install   -                 5.3.28_8               837KB
+libsamplerate-32bit           install   -                 0.2.2_1                1338KB
+opus-32bit                    install   -                 1.6.1_1                4010KB
+libjack-32bit                 install   -                 1.9.22_1               497KB
+libltdl-32bit                 install   -                 2.4.7_8                19KB
+libflac-32bit                 install   -                 1.5.0_1                253KB
+libvorbis-32bit               install   -                 1.3.7_1                198KB
+libmpg123-32bit               install   -                 1.33.7_1               242KB
+lame-32bit                    install   -                 4.0_1                  132KB
+libsndfile-32bit              install   -                 1.2.2_2                247KB
+libsoxr-32bit                 install   -                 0.1.3_2                94KB
+libtdb-32bit                  install   -                 1.4.15_1               47KB
+orc-32bit                     install   -                 0.4.42_1               338KB
+sbc-32bit                     install   -                 2.2_1                  35KB
+speexdsp-32bit                install   -                 1.2.1_1                43KB
+webrtc-audio-processing-32bit install   -                 1.3_1                  552KB
+libpulseaudio-32bit           install   -                 16.1_2                 1066KB
+SDL2-32bit                    install   -                 2.32.10_1              771KB
+wine-32bit                    install   -                 11.14_1                4301KB
+
+Size to download:               38MB
+Size required on disk:         150MB
+Space available on disk:       683GB
+
+Do you want to continue? [Y/n]
+
+
+
+
+
+August 3rd update :
+Name                     Action    Version           New version            Download size
+7zip                     update    26.01_1           26.02_1                1203KB
+LuaJIT                   update    2.1.1783773675_1  2.1.1785192264_1       407KB
+acl                      update    2.3.2_1           2.4.0_1                20KB
+attr                     update    2.5.2_2           2.6.0_1                9495B
+cava                     update    0.10.7_1          1.0.0_1                77KB
+ddcutil                  update    2.2.6_1           2.2.6_2                792KB
+dhcpcd                   update    10.3.1_1          10.3.2_1               200KB
+fastfetch                update    2.65.2_1          2.66.0_1               720KB
+firefox                  update    152.0.6_1         153.0.1_1              88MB
+fzf                      update    0.74.0_1          0.74.2_1               1899KB
+giflib                   update    5.2.2_1           6.1.3_1                47KB
+gpgmepp                  update    2.0.0_1           2.1.0_1                147KB
+graphviz-libs            update    15.0.0_1          15.1.0_1               515KB
+htop                     update    3.5.1_1           3.5.2_1                175KB
+kitty                    update    0.47.4_1          0.48.2_1               10MB
+kitty-kitten             update    0.47.4_1          0.48.2_1               8608KB
+kitty-shell-integration  update    0.47.4_1          0.48.2_1               25KB
+kitty-terminfo           update    0.47.4_1          0.48.2_1               2743B
+lame                     update    3.100_2           4.0_1                  262KB
+libarchive               update    3.8.8_1           3.8.9_1                371KB
+libbytesize              update    2.10_3            2.12_1                 17KB
+libcap-ng                update    0.8.5_4           0.9.3_1                14KB
+libcryptsetup            update    2.8.6_1           2.8.7_1                272KB
+libde265                 update    1.0.18_2          1.1.1_1                214KB
+libei                    update    1.5.0_1           1.6.0_1                87KB
+libevdev                 update    1.13.4_1          1.13.6_1               36KB
+libgbm                   update    26.1.5_1          26.1.6_1               6760B
+libgbm-32bit             update    26.1.5_1          26.1.6_1               7366B
+libgpgme                 update    2.0.1_1           2.1.2_1                149KB
+libharfbuzz              update    14.2.1_1          14.3.0_1               1248KB
+libheif                  update    1.23.0_2          1.23.1_1               818KB
+libidn2                  update    2.3.4_1           2.3.8_1                176KB
+libmpg123                update    1.33.5_2          1.33.7_1               224KB
+libnl3                   update    3.11.0_1          3.12.0_1               371KB
+libpoppler               update    26.06.0_1         26.07.0_1              1411KB
+libproxy                 update    0.5.11_1          0.5.12_1               24KB
+librist                  update    0.2.18_1          0.2.20_1               138KB
+libseccomp               update    2.5.5_1           2.6.1_1                56KB
+libsrt                   update    1.5.5_1           1.5.6_1                399KB
+libsynctex               update    20250308_2        20260301_1             45KB
+libunbound               update    1.25.1_1          1.25.2_1               542KB
+libupower-glib3          update    1.90.9_2          1.91.3_2               44KB
+libva                    update    2.22.0_1          2.24.1_1               95KB
+libva-32bit              update    2.22.0_1          2.24.1_1               94KB
+libvpl                   update    2.16.0_1          2.17.0_1               152KB
+libwacom                 update    2.19.0_1          2.19.1_1               181KB
+linux6.18                update    6.18.38_1         6.18.41_1              160MB
+linux7.1                 update    7.1.3_1           7.1.5_1                164MB
+linux7.1-headers         update    7.1.3_1           7.1.5_1                13MB
+mesa                     update    26.1.5_1          26.1.6_1               795KB
+mesa-32bit               update    26.1.5_1          26.1.6_1               807KB
+mesa-dri                 update    26.1.5_1          26.1.6_1               22KB
+mesa-dri-32bit           update    26.1.5_1          26.1.6_1               21KB
+mesa-libgallium          update    26.1.5_1          26.1.6_1               12MB
+mesa-libgallium-32bit    update    26.1.5_1          26.1.6_1               12MB
+mesa-vaapi               update    26.1.5_1          26.1.6_1               823B
+mesa-vaapi-32bit         update    26.1.5_1          26.1.6_1               819B
+mesa-vulkan-radeon       update    26.1.5_1          26.1.6_1               3787KB
+mesa-vulkan-radeon-32bit update    26.1.5_1          26.1.6_1               4052KB
+nghttp2                  update    1.69.0_1          1.70.0_1               978KB
+nghttp3                  update    1.16.0_1          1.18.0_1               73KB
+ngtcp2                   update    1.24.0_1          1.25.0_1               174KB
+noto-fonts-ttf           update    2026.07.01_1      2026.08.01_1           17MB
+nss                      update    3.125_1           3.126_1                2747KB
+openssh                  update    10.4p1_1          10.4p1_2               1396KB
+orc                      update    0.4.41_2          0.4.42_1               329KB
+pinentry                 update    1.3.2_1           1.3.3_1                56KB
+poppler                  update    26.06.0_1         26.07.0_1              249KB
+removed-packages         update    0.1.20260619_1    0.1.20260702_1         9582B
+ripgrep                  update    15.1.0_1          15.2.0_1               1649KB
+sbc                      update    2.0_1             2.2_1                  50KB
+sqlite                   update    3.53.2_1          3.53.4_1               1226KB
+swaylock                 update    1.8.5_1           1.8.6_1                32KB
+tpm2-tss                 update    4.1.3_1           4.2.0_3                528KB
+upower                   update    1.90.9_2          1.91.3_2               128KB
+vulkan-loader            update    1.4.341.0_1       1.4.350.1_1            162KB
+vulkan-loader-32bit      update    1.4.341.0_1       1.4.350.1_1            173KB
+x264                     update    20250402.165_1    20250402.165_2         779KB
+xorg-server-xwayland     update    24.1.9_2          24.1.13_2              1016KB
+xwayland-satellite       update    0.8.1_1           0.8.2_1                1720KB
+
+Size to download:              522MB
+Size required on disk:        1007MB
+Space available on disk:       774GB
+
+Do you want to continue? [Y/n]

@@ -1,0 +1,156 @@
+* {
+    border: none;
+    border-radius: 0px;
+    font-family: CaskaydiaCoveNF;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: normal;
+    min-height: 0;
+}
+
+window#waybar {
+    background: rgba(0,0,0,0),
+    }
+
+
+#clock, 
+#pulseaudio, 
+#network, 
+#cpu,
+#memory,
+#temperature,
+#backlight,
+#battery,
+#custom-yazi,
+#custom-kitty,
+#custom-power,
+#custom-work1,
+#custom-work2,
+#custom-work3,
+#custom-work4,
+#custom-work5,
+#custom-work6,
+#custom-work7,
+#custom-work8,
+#custom-work9,
+#custom-launcher {
+    padding: 4px 5px 3px 6px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    border-radius: 8px;
+    color: #ff9e64;
+    background: rgba(26,27,38,0.8);
+    opacity: 0.8;
+    box-shadow: rgba(0, 0, 0, 0) 2px 2px 5px 2px;
+/*    box-shadow: rgba(0, 0, 0, 0.288) 2px 2px 5px 2px; */
+    }
+
+
+
+
+
+#clock {
+    color: #7dcfff;
+    }
+
+#cpu {
+    padding-right: 4px;
+    color: #a778ff;
+    }
+
+#memory {
+    padding-right: 10px;
+    color: #7dcfff;
+    }
+
+#temperature {
+    padding-right: 5px;
+    color: #fc8b47;
+    }
+
+#temperature.critical {
+    padding-right: 10px;
+    color: #fa233c;
+    text-shadow: 0 0 3px #ee2000;
+    }
+
+#backlight {
+    padding-right: 8px;
+    color: #c6cff5;
+    }
+
+#network {
+    color: #6595fc;
+    }
+
+#network.disconnected {
+    color: #fa233c;
+    }
+
+#pulseaudio {
+    color: #ff007c;
+    }
+
+#pulseaudio.muted {
+    color: #a293bf;
+    }
+
+#battery {
+    color: #9ece6a;
+    }
+#battery.good {
+    color: #9ece6a;
+    }
+#battery.warning {
+    color: #fa8c4b;
+    }
+#battery.critical {
+    color: #fa233c;
+    text-shadow: 0 0 2px #ff0000;
+    animation: battery-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes battery-pulse {
+    0%   { opacity: 0.75; }
+    50%  { opacity: 0.4; }
+    100% { opacity: 0.75; }
+}
+
+
+
+
+#custom-power {
+    padding-right: 3px;
+    padding-left: 8px;
+    color: #fa3258;
+    }
+
+#custom-launcher {
+    margin-left: 5px;
+    padding-right: 7px;
+    padding-left: 9px;
+    color: #8cd158;
+    }
+
+
+#custom-work1,
+#custom-work2,
+#custom-work3,
+#custom-work4,
+#custom-work5,
+#custom-work6,
+#custom-work7,
+#custom-work8,
+#custom-work9 {
+    margin-right: 0px;
+    padding-right: 7px;
+    padding-left: 7px;
+    background: rgba(26,27,38,0.3);
+    }
+
+#custom-work2 {
+    padding-right: 9px;
+    padding-left: 9px;
+    background: rgba(26,27,38,0.8);
+}

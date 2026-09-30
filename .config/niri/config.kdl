@@ -1,0 +1,577 @@
+input {
+    keyboard {
+        xkb {
+            // You can set rules, model, layout, variant and options.
+            // For more information, see xkeyboard-config(7).
+            layout "fr"
+            options "shift:breaks_caps"
+            // If this section is empty, niri will fetch xkb settings
+            // from org.freedesktop.locale1. You can control these using
+            // localectl set-x11-keymap.
+        }
+        numlock
+        repeat-delay 425
+    }
+
+    touchpad {
+    	tap
+    	natural-scroll
+    	dwt
+    }
+
+    // Next sections include libinput settings.
+    // Omitting settings disables them, or leaves them at their default values.
+    mouse {
+        // off
+        // natural-scroll
+        accel-speed 0 // -.25 FOR NORMAL USAGE
+        accel-profile "flat"
+        // scroll-method "no-scroll"
+    }
+
+    // Uncomment this to make the mouse warp to the center of newly focused windows.
+    // warp-mouse-to-focus
+
+    // Focus windows and outputs automatically when moving the mouse into them.
+    // Setting max-scroll-amount="0%" makes it work only on windows already fully on screen.
+    focus-follows-mouse max-scroll-amount="20%"
+}
+
+output "DP-3" {
+    // off
+
+    // Resolution and, optionally, refresh rate of the output.
+    // The format is "<width>x<height>" or "<width>x<height>@<refresh rate>".
+    // If the refresh rate is omitted, niri will pick the highest refresh rate
+    // for the resolution.
+    // If the mode is omitted altogether or is invalid, niri will pick one automatically.
+    // Run `niri msg outputs` while inside a niri instance to list all outputs and their modes.
+    mode "1440x900"
+
+    // You can use integer or fractional scale, for example use 1.5 for 150% scale.
+    scale 1
+
+    // Transform allows to rotate the output counter-clockwise, valid values are:
+    // normal, 90, 180, 270, flipped, flipped-90, flipped-180 and flipped-270.
+    transform "normal"
+
+    // position x=1280 y=0
+}
+
+layout {
+    // Set gaps around windows in logical pixels.
+    gaps 6
+
+    center-focused-column "never"
+    always-center-single-column
+
+    default-column-width { proportion 0.5; }
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+
+        // Fixed sets the width in logical pixels exactly.
+        // fixed 1920
+    }
+
+    preset-window-heights {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
+    }
+
+    focus-ring {
+        width 1
+        active-color "#7aa2f7"
+        inactive-color "#505050"
+        active-gradient from="#7dcfff" to="#7aa2f7" angle=35
+    }
+
+    // Struts shrink the area occupied by windows, similarly to layer-shell panels.
+    struts {
+        // left 64
+        // right 64
+        // top 64
+        // bottom 64
+    }
+}
+
+// Can configure blur; see wiki
+// Can configure custom permanent named workspaces; see wiki
+
+overview {
+    zoom 0.55
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+cursor {
+    xcursor-theme "phinger-cursors-light"
+    xcursor-size 24
+}
+
+environment {
+  XDG_CURRENT_DESKTOP "niri"
+  XDG_SESSION_TYPE "wayland"
+  LIBVA_DRIVER_NAME "radeonsi"
+  PYTHONPYCACHEPREFIX "/home/gap/.cache/pycache"
+}
+
+// spawn-at-startup "xwayland-satellite"
+// Apparently not needed in niri>=25.08 since it lazy launches when needed.
+// Can add xwayland-satellite bloc to point to custom path; see wiki
+spawn-at-startup "pipewire"
+spawn-at-startup "udiskie"
+spawn-at-startup "qs" "-c" "noctalia-shell"
+
+// Uncomment this line to ask the clients to omit their client-side decorations if possible.
+// If the client will specifically ask for CSD, the request will be honored.
+// Additionally, clients will be informed that they are tiled, removing some client-side rounded corners.
+// This option will also fix border/focus ring drawing behind some semitransparent windows.
+// After enabling or disabling this, you need to restart the apps for this to take effect.
+prefer-no-csd
+
+// The path is formatted with strftime(3) to give you the screenshot date and time.
+screenshot-path "~/Pictures/Screenshots/Screenshot %Y-%m-%d %H-%M-%S.jpg"
+
+animations {
+    // off
+    // slowdown 5.0
+
+    window-resize {
+        spring damping-ratio=0.92 stiffness=700 epsilon=0.0001
+    }
+
+    window-open {
+            duration-ms 340
+            curve "linear"
+            custom-shader r"
+                float hash(vec2 p) {
+                    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+                }
+                float noise(vec2 p) {
+                    vec2 i = floor(p);
+                    vec2 f = fract(p);
+                    f = f * f * (3.0 - 2.0 * f);
+                    float a = hash(i);
+                    float b = hash(i + vec2(1.0, 0.0));
+                    float c = hash(i + vec2(0.0, 1.0));
+                    float d = hash(i + vec2(1.0, 1.0));
+                    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                }
+                float fbm(vec2 p) {
+                    float v = 0.0;
+                    float amp = 0.5;
+                    for (int i = 0; i < 5; i++) {
+                        v += amp * noise(p);
+                        p *= 2.0;
+                        amp *= 0.5;
+                    }
+                    return v;
+                }
+                float warpedFbm(vec2 p, float t) {
+                    vec2 q = vec2(fbm(p),
+                                  fbm(p + vec2(5.2, 1.3)));
+
+                    vec2 pq = p + 6.0 * q;
+                    vec2 r = vec2(fbm(pq + vec2(1.7, 9.2) + 0.25 * t),
+                                  fbm(pq + vec2(8.3, 2.8) + 0.22 * t));
+
+                    vec2 pr = p + 5.0 * r;
+                    vec2 s = vec2(fbm(pr + vec2(3.1, 7.4) + 0.18 * t),
+                                  fbm(pr + vec2(6.7, 0.9) + 0.2 * t));
+
+                    return fbm(p + 6.0 * s);
+                }
+                vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+                    float p = niri_clamped_progress;
+                    vec2 uv = coords_geo.xy;
+                    float seed = niri_random_seed * 100.0;
+                    float t = p * 12.0 + seed;
+
+                    vec2 uv2 = uv * 2.0;
+                    float fluid = warpedFbm(uv2 + seed, t);
+
+                    vec2 center = uv - 0.5;
+                    float dist = length(center * vec2(1.0, 0.7));
+                    float appear = (1.0 - dist * 1.2) + (1.0 - fluid) * 0.7;
+                    float reveal = smoothstep(appear + 0.5, appear - 0.5, (1.0 - p) * 1.8);
+
+                    if (reveal < 0.004) return vec4(0.0);
+
+                    float distort_strength = (1.0 - p) * (1.0 - p) * 0.35;
+
+                    vec2 warped_uv = uv;
+                    if (distort_strength > 0.0005) {
+                        float t02 = t * 0.2;
+                        vec2 wq = vec2(fbm(uv2 + vec2(0.0, t02)),
+                                       fbm(uv2 + vec2(5.2, t02)));
+                        warped_uv = uv + (wq - 0.5) * distort_strength;
+                    }
+                    vec3 tex_coords = niri_geo_to_tex * vec3(warped_uv, 1.0);
+                    vec4 color = texture2D(niri_tex, tex_coords.st);
+
+                    return color * reveal;
+                }
+            "
+        }
+
+    window-close {
+            duration-ms 340
+            curve "linear"
+            custom-shader r"
+                float hash(vec2 p) {
+                    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+                }
+                float noise(vec2 p) {
+                    vec2 i = floor(p);
+                    vec2 f = fract(p);
+                    f = f * f * (3.0 - 2.0 * f);
+                    float a = hash(i);
+                    float b = hash(i + vec2(1.0, 0.0));
+                    float c = hash(i + vec2(0.0, 1.0));
+                    float d = hash(i + vec2(1.0, 1.0));
+                    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+                }
+                float fbm(vec2 p) {
+                    float v = 0.0;
+                    float amp = 0.5;
+                    for (int i = 0; i < 5; i++) {
+                        v += amp * noise(p);
+                        p *= 2.0;
+                        amp *= 0.5;
+                    }
+                    return v;
+                }
+                float warpedFbm(vec2 p, float t) {
+                    vec2 q = vec2(fbm(p),
+                                  fbm(p + vec2(5.2, 1.3)));
+
+                    vec2 pq = p + 6.0 * q;
+                    vec2 r = vec2(fbm(pq + vec2(1.7, 9.2) + 0.25 * t),
+                                  fbm(pq + vec2(8.3, 2.8) + 0.22 * t));
+
+                    vec2 pr = p + 5.0 * r;
+                    vec2 s = vec2(fbm(pr + vec2(3.1, 7.4) + 0.18 * t),
+                                  fbm(pr + vec2(6.7, 0.9) + 0.2 * t));
+
+                    return fbm(p + 6.0 * s);
+                }
+                vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+                    float p = niri_clamped_progress;
+                    vec2 uv = coords_geo.xy;
+                    float seed = niri_random_seed * 100.0;
+                    float t = p * 12.0 + seed;
+
+                    vec2 uv2 = uv * 2.0;
+                    float fluid = warpedFbm(uv2 + seed, t);
+
+                    vec2 center = uv - 0.5;
+                    float dist = length(center * vec2(1.0, 0.7));
+                    float dissolve = (1.0 - dist) * 1.2 + fluid * 0.7;
+                    float remain = smoothstep(dissolve + 0.5, dissolve - 0.5, p * 1.8);
+                    float tail = smoothstep(1.0, 0.8, p);
+
+                    if (remain * tail < 0.004) return vec4(0.0);
+
+                    float distort_strength = p * p * 0.4;
+
+                    vec2 warped_uv = uv;
+                    if (distort_strength > 0.0005) {
+                        float t02 = t * 0.2;
+                        vec2 wq = vec2(fbm(uv2 + vec2(0.0, t02)),
+                                       fbm(uv2 + vec2(5.2, t02)));
+                        warped_uv = uv + (wq - 0.5) * distort_strength;
+                    }
+                    vec3 tex_coords = niri_geo_to_tex * vec3(warped_uv, 1.0);
+                    vec4 color = texture2D(niri_tex, tex_coords.st);
+
+                    return color * remain * tail;
+                }
+            "
+        }
+}
+
+// Open the Firefox picture-in-picture player as floating by default.
+window-rule {
+    // This app-id regular expression will work for both:
+    // - host Firefox (app-id is "firefox")
+    // - Flatpak Firefox (app-id is "org.mozilla.firefox")
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+window-rule {
+    match app-id="Firefox"
+    match app-id="vesktop"
+    match app-id="heroic"
+    match app-id="java.exe"
+    match app-id="qemu"
+    default-column-width { proportion 1.0; }
+}
+
+window-rule {
+    match app-id="mpv"
+//    default-column-width { proportion 0.8; }
+//    default-column-height { propotion 0.8; }
+    open-floating true
+}
+
+window-rule {
+    match app-id="dev.zed.Zed"
+    match app-id="Spotify"
+    match app-id="steam"
+    default-column-width { proportion 0.7; }
+}
+
+window-rule {
+    match app-id="amdgpu_top"
+    default-column-width { proportion 0.85; }
+}
+
+window-rule {
+  match app-id="dev.noctalia.noctalia-qs"
+  default-column-width { proportion 0.55; }
+  open-floating false
+}
+
+window-rule {
+  opacity 0.98
+  geometry-corner-radius 6
+  clip-to-geometry true
+}
+
+window-rule {
+  match is-focused=true
+  opacity 1.0
+}
+
+
+layer-rule {
+  match namespace="^noctalia-overview*"
+  place-within-backdrop true
+}
+
+
+debug {
+  // Allows notification actions and window activation from Noctalia.
+  honor-xdg-activation-with-invalid-serial
+}
+
+binds {
+    // Keys consist of modifiers separated by + signs, followed by an XKB key name
+    // in the end. To find an XKB name for a particular key, you may use a program
+    // like wev.
+
+    // "Mod" is a special modifier equal to Super when running on a TTY, and to Alt
+    // when running as a winit window.
+
+    Mod+Return     hotkey-overlay-title="Kitty"      { spawn "kitty"; }
+    Mod+Shift+Return hotkey-overlay-title="Wofi"     { spawn "wofi" "-n" "--show" "drun" "~/"; }
+    Mod+E          hotkey-overlay-title="Yazi"       { spawn "kitty" "-e" "yazi"; }
+
+    Ctrl+Mod+Shift+U        hotkey-overlay-title="feldoupe"       { spawn "mpv" ".local/unraveled.mp3"; }
+
+
+    Mod+Escape     hotkey-overlay-title="Session"    { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "sessionMenu" "toggle"; }
+    Mod+semicolon  hotkey-overlay-title="Emojis"     { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "emoji"; }
+    Mod+X          hotkey-overlay-title="Clipboard"  { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "clipboard"; }
+    Mod+Space      hotkey-overlay-title="Commands"   { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "launcher" "command"; }
+    Ctrl+Alt+L     hotkey-overlay-title="Lock"       { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
+    Mod+Shift+M    hotkey-overlay-title="Wallpapers" { spawn "qs" "-c" "noctalia-shell" "ipc" "call" "wallpaper" "toggle"; }
+
+    // The allow-when-locked=true property makes them work even when the session is locked.
+    // Using spawn-sh allows to pass multiple arguments together with the command.
+    // "-l 1.0" limits the volume to 100%.
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-"; }
+    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+
+    // This will work with any MPRIS-enabled media player.
+    XF86AudioPlay        allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioStop        allow-when-locked=true { spawn-sh "playerctl stop"; }
+    XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
+    XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
+
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+0%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "-5%"; }
+
+    Mod+Shift+L hotkey-overlay-title="Send window to the deepest parts of hell" { move-column-to-workspace 99 focus=false; }
+
+
+    Mod+O repeat=false { toggle-overview; }
+
+    Mod+Shift+A repeat=false { close-window; }
+
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+
+    Mod+Ctrl+Left  { move-column-left; }
+    Mod+Ctrl+Down  { move-window-down; }
+    Mod+Ctrl+Up    { move-window-up; }
+    Mod+Ctrl+Right { move-column-right; }
+
+    Mod+J       { focus-window-or-workspace-down; }
+    Mod+K       { focus-window-or-workspace-up; }
+    Mod+Ctrl+J  { move-window-down-or-to-workspace-down; }
+    Mod+Ctrl+K  { move-window-up-or-to-workspace-up; }
+
+    Mod+H { focus-column-first; }
+    Mod+L  { focus-column-last; }
+    Mod+Ctrl+H { move-column-to-first; }
+    Mod+Ctrl+L  { move-column-to-last; }
+
+    Mod+Shift+Left  { focus-monitor-left; }
+    Mod+Shift+Down  { focus-monitor-down; }
+    Mod+Shift+Up    { focus-monitor-up; }
+    Mod+Shift+Right { focus-monitor-right; }
+
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+
+    // Alternatively, there are commands to move just a single window:
+    // Mod+Shift+Ctrl+Left  { move-window-to-monitor-left; }
+    // ...
+
+    // And you can also move a whole workspace to another monitor:
+    // Mod+Shift+Ctrl+Left  { move-workspace-to-monitor-left; }
+    // ...
+
+    Mod+Page_Down      { focus-workspace-down; }
+    Mod+Page_Up        { focus-workspace-up; }
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+
+    // Alternatively, there are commands to move just a single window:
+    // Mod+Ctrl+Page_Down { move-window-to-workspace-down; }
+    // ...
+
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+
+    // You can bind mouse wheel scroll ticks using the following syntax.
+    // These binds will change direction based on the natural-scroll setting.
+    Mod+WheelScrollDown      cooldown-ms=130 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=130 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=130 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=130 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+
+    // Usually scrolling up and down with Shift in applications results in
+    // horizontal scrolling; these binds replicate that.
+    Mod+Shift+WheelScrollDown      { focus-column-right; }
+    Mod+Shift+WheelScrollUp        { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+
+    // Similarly, you can bind touchpad scroll "ticks".
+    // Touchpad scrolling is continuous, so for these binds it is split into
+    // discrete intervals.
+    // These binds are also affected by touchpad's natural-scroll, so these
+    // example binds are "inverted", since we have natural-scroll enabled for
+    // touchpads by default.
+    // Mod+TouchpadScrollDown { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02+"; }
+    // Mod+TouchpadScrollUp   { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.02-"; }
+
+    Mod+ampersand { focus-workspace 1; }
+    Mod+eacute { focus-workspace 2; }
+    Mod+quotedbl { focus-workspace 3; }
+    Mod+apostrophe { focus-workspace 4; }
+    Mod+parenleft { focus-workspace 5; }
+    Mod+minus { focus-workspace 6; }
+    Mod+egrave { focus-workspace 7; }
+    Mod+underscore { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Shift+ampersand { move-column-to-workspace 1; }
+    Mod+Shift+eacute { move-column-to-workspace 2; }
+    Mod+Shift+quotedbl { move-column-to-workspace 3; }
+    Mod+Shift+apostrophe { move-column-to-workspace 4; }
+    Mod+Ctrl+parenleft { move-column-to-workspace 5; }
+    Mod+Ctrl+minus { move-column-to-workspace 6; }
+    Mod+Ctrl+egrave { move-column-to-workspace 7; }
+    Mod+Ctrl+underscore { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    // Alternatively, there are commands to move just a single window:
+    // Mod+Ctrl+1 { move-window-to-workspace 1; }
+
+    // Switches focus between the current and the previous workspace.
+    Mod+Tab { focus-workspace-previous; }
+
+    // The following binds move the focused window in and out of a column.
+    // If the window is alone, they will consume it into the nearby column to the side.
+    // If the window is already in a column, they will expel it out.
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+Ctrl+F { expand-column-to-available-width; }
+
+    Mod+C { center-column; }
+    Mod+Ctrl+C { center-visible-columns; }
+
+    Mod+KP_Subtract { set-column-width "-10%"; }
+    Mod+KP_Add { set-column-width "+10%"; }
+    Mod+Shift+KP_Subtract { set-window-height "-10%"; }
+    Mod+Shift+KP_Add { set-window-height "+10%"; }
+
+    Mod+V       { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+
+    // Toggle tabbed column display mode.
+    Mod+W { toggle-column-tabbed-display; }
+
+    // Actions to switch layouts.
+    // Note: if you uncomment these, make sure you do NOT have
+    // a matching layout switch hotkey configured in xkb options above.
+    // Having both at once on the same hotkey will break the switching,
+    // since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
+    // Mod+Space       { switch-layout "next"; }
+    // Mod+Shift+Space { switch-layout "prev"; }
+
+    Mod+Shift+S { screenshot; }
+    Print { screenshot-screen; }
+    Ctrl+Print { screenshot-window; }
+
+    // Applications such as remote-desktop clients and software KVM switches may
+    // request that niri stops processing the keyboard shortcuts defined here
+    // so they may, for example, forward the key presses as-is to a remote machine.
+    // It's a good idea to bind an escape hatch to toggle the inhibitor,
+    // so a buggy application can't hold your session hostage.
+    // The allow-inhibiting=false property can be applied to other binds as well,
+    // which ensures niri always processes them, even when an inhibitor is active.
+    Mod+Shift+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+
+    // The quit action will show a confirmation dialog to avoid accidental exits.
+    Ctrl+Alt+Delete { quit; }
+
+    // Powers off the monitors. To turn them back on, do any input like moving the mouse or pressing any other key.
+    Mod+Shift+P { power-off-monitors; }
+}

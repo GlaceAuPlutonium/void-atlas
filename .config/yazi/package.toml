@@ -1,0 +1,44 @@
+[[plugin.deps]]
+use = "yazi-rs/plugins:mount"
+rev = "4e55902"
+hash = "e2d4bfccf31e5ab05f46fee4797c5215"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:chmod"
+rev = "4e55902"
+hash = "8da0b15a97b5dfd13941d1ecc617ac7c"
+
+[[plugin.deps]]
+use = "yazi-rs/plugins:full-border"
+rev = "4e55902"
+hash = "3996fc74044bc44144b323686f887e1"
+
+[[plugin.deps]]
+use = "grappas/wl-clipboard"
+rev = "e9a38e4"
+hash = "6b8e5d6b09626facec713923d3ddb54b"
+
+[[plugin.deps]]
+use = "KKV9/compress"
+rev = "c9c16d8"
+hash = "a68bde26a61da040131aa95069f638c2"
+
+[[plugin.deps]]
+use = "pirafrank/what-size"
+rev = "179ebf6"
+hash = "57056b9728006881d580ccabe8154a9c"
+
+[[plugin.deps]]
+use = "uhs-robert/recycle-bin"
+rev = "69d7d4c"
+hash = "38dac2fc8f4b50bbdaa46e699720a54a"
+
+[[plugin.deps]]
+use = "WhoSowSee/whoosh"
+rev = "ec2e6f7"
+hash = "59e984146fa6b20c441817444d5fdd61"
+
+[[flavor.deps]]
+use = "BennyOe/tokyo-night"
+rev = "8e6296f"
+hash = "d9da921c3bd37ba32ee27a8a7a40461f"

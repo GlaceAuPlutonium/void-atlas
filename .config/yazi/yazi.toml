@@ -1,0 +1,90 @@
+[mgr]
+show_hidden = true
+show_symlink = true
+sort_by = "alphabetical"
+sort_dir_first = true
+
+[preview]
+image_delay = 50
+image_filter = "catmull-rom"
+wrap = "yes"
+
+
+[opener]
+
+pdf = [
+    { run = 'zathura "$@"', desc = "Zathura", block = false },
+    { run = 'firefox "$@"', desc = "Firefox", block = false },
+]
+
+play = [
+	{ run = 'mpv "$@"', orphan = true, for = "unix" },
+]
+
+edit = [
+	{ run = '/home/gap/.local/zed.app/bin/zed "$@"', block = true, for = "unix" },
+	{ run = 'kitty -e micro "$@"', block = true, for = "unix" },
+]
+
+image = [
+	{ run = 'imv "$@"', orphan = true, desc = "Image Viewer", for = "unix" },
+]
+
+run = [
+	{ run = 'kitty -e "$1"', desc = "Run in terminal", block = false },
+]
+
+browser = [
+	{ run = 'firefox "$@"', desc = "Firefox", block = false },
+]
+
+exif = [
+	{ run = 'exiftool "$1" | less', desc = "Show EXIF", block = true },
+]
+
+my-fallback = [
+	{ run = '/home/gap/.local/zed.app/bin/zed "$@"', block = true, for = "unix" },
+]
+
+[open]
+prepend_rules = [
+#TEXT
+	{ url = "*.txt", use = "edit" },
+	{ url = "*.md", use = "edit" },
+	{ url = "*.rst", use = "edit" },
+	{ url = "*.log", use = "edit" },
+	{ url = "*.csv", use = "edit" },
+	{ url = "*.tsv", use = "edit" },
+	{ url = "*.org", use = "edit" },
+
+#CONFIG
+	{ url = "*.ini", use = "edit" },
+	{ url = "*.cfg", use = "edit" },
+	{ url = "*.conf", use = "edit" },
+	{ url = "*.json", use = "edit" },
+	{ url = "*.jsonc", use = "edit" },
+	{ url = "*.toml", use = "edit" },
+	{ url = "*.yaml", use = "edit" },
+	{ url = "*.yml", use = "edit" },
+
+# SPECIFIC LANGUAGES
+	{ url = "*.css", use = "edit" },
+	{ url = "*.scss", use = "edit" },
+	{ url = "*.yuck", use = "edit" },
+	{ url = "*.py", use = "edit" },
+	{ url = "*.html", use = ["browser", "edit"] },
+	{ url = "*.lua", use = "edit" },
+	{ url = "*.xml", use = "edit" },
+	{ url = "*.sh", use = ["edit", "run"] },
+
+    { mime = "image/*", use = ["image" ,"exif"] },
+    { mime = "video/*", use = "play" },
+    { mime = "audio/*", use = "play" },
+    { mime = "application/pdf", use = "pdf" },
+]
+
+append_rules = [
+	{ url = "*", use = "my-fallback" },
+]
+
+# reminder : don't use the "rules" section else yazi's native archiver aint working
