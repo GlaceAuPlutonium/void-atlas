@@ -177,7 +177,7 @@ if [[ "$choice" == "y" ]]; then
   echo "Installing Visor..."
   sudo xbps-install -S gnu-efi-libs gcc make
 
-  wget https://github.com/IO-ZetZor/Visor-BootManager/archive/refs/tags/v1.5.6.tar.gz | tar xfj - -C
+  wget -O - https://github.com/IO-ZetZor/Visor-BootManager/archive/refs/tags/v1.5.6.tar.gz | tar xfz -
   cp files/visor/icons/* Visor-BootManager-1.5.6/assets/icons/
   cp files/visor/backgrounds/* Visor-BootManager-1.5.6/assets/backgrounds/
   cp files/visor/gui_blur.c Visor-BootManager-1.5.6/src/gui/gui_blur.c
