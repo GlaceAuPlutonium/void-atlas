@@ -2,7 +2,12 @@
 
 # 01-PACKAGES
 
+
 set -e
+
+echo "Welcome to the installer!"
+
+read -p "Perform packages installation ? [Enter/Ctrl+C] : " answer
 
 echo "Updating system and installing packages..."
 
@@ -22,10 +27,18 @@ else
   echo "Skipped shell stuff installation."
 fi
 
+read -p "Install SYSTEM related components ? [y/n] : " choice
+if [[ "$choice" == "y" ]]; then
+  echo "Installing system infos stuff..."
+  sudo xbps-install -S wget curl git openssh ntfs-3g udisks2 udiskie 7zip
+else
+  echo "Skipped system infos stuff installation."
+fi
+
 read -p "Install SYSINFO related components ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing system infos stuff..."
-  sudo xbps-install -S fastfetch btop bottom htop nvtop duf lm_sensors
+  sudo xbps-install -S fastfetch btop htop nvtop amdgpu_top duf lm_sensors
 else
   echo "Skipped system infos stuff installation."
 fi
@@ -41,7 +54,7 @@ fi
 read -p "Install DESKTOP related components ? (DOES NOT INSTALL NOCTALIA) [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing desktop stuff..."
-  sudo xbps-install -S niri wofi mako swaylock wlogout slurp grim wl-clipboard cliphist wlr-randr wlsunset xdg-desktop-portal xdg-desktop-portal-wlr xwayland-satellite playerctl brightnessctl ddcutil
+  sudo xbps-install -S niri wofi slurp grim wl-clipboard cliphist wlr-randr wlsunset xdg-desktop-portal xdg-desktop-portal-wlr xwayland-satellite playerctl brightnessctl ddcutil
 else
   echo "Skipped desktop installation."
 fi
@@ -49,7 +62,7 @@ fi
 read -p "Install MEDIA related components ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing media stuff..."
-  sudo xbps-install -S pipewire pulseaudio-utils helvum pavucontrol cava mpv imv ffmpeg6 ffplay6 gpu-screen-recorder zathura zathura-pdf-mupdf
+  sudo xbps-install -S pipewire pulseaudio-utils helvum pavucontrol cava mpv imv ffmpeg6 ffplay6 zathura zathura-pdf-mupdf
 else
   echo "Skipped media stuff installation."
 fi
@@ -57,12 +70,12 @@ fi
 read -p "Install LOOK/MISCS related components ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing other stuff..."
-  sudo xbps-install -S nwg-look qt6ct gtk-engine-murrine nerd-fonts-symbols-ttf noto-fonts-ttf noto-fonts-emoji dejavu-fonts-ttf font-awesome wget curl git openssh ntfs-3g udisks2 udiskie 7zip cmatrix asciiquarium
+  sudo xbps-install -S nwg-look qt6ct gtk-engine-murrine nerd-fonts-symbols-ttf noto-fonts-ttf noto-fonts-emoji dejavu-fonts-ttf font-awesome cmatrix asciiquarium
 else
   echo "Skipped other stuff installation."
 fi
 
-read -p "all the remaining random stuff ? [y/n] : " choice
+read -p "all the remaining random stuff i don't know how to classify ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing random stuff..."
   sudo xbps-install -S sassc rav1e x264 x265 dav1d man-pages wev xdg-user-dirs xdg-utils libinput
@@ -73,24 +86,26 @@ fi
 echo "Packages installed."
 
 
-
 # 02-SETUP
+
+read -p "Perform setup ? [Enter/Ctrl+C] : " answer
 
 echo "Setting up annoying system related things..."
 
 # Noctalia
-read -p "Create Noctalia Shell repository ? [y/n] : " choice
+read -p "Add Voiders repository ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
-  echo "Creating Noctalia Shell repository..."
+  echo "Creating Voiders repository..."
   echo "repository=https://repo.voiders.dev/void" | sudo tee /etc/xbps.d/10-voiders-community.conf
 else
-  echo "Skipped Noctalia Shell repository creation."
+  echo "Skipped Voiders repository creation."
 fi
 read -p "Install Noctalia Shell ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing Noctalia Shell..."
-  sudo xbps-install -S
-  sudo xbps-install noctalia
+  echo "Currently can't install Noctalia from distant repo due to it being deprecated. Noctalia install process will be added later. Skipping installation."
+  #sudo xbps-install -S
+  #sudo xbps-install noctalia
 else
   echo "Skipped Noctalia Shell installation."
 fi
@@ -112,6 +127,8 @@ echo "Done setting up annoying little things."
 
 
 # 03-EXTRAS
+
+read -p "Perform extras installation ? [Enter/Ctrl+C] : " answer
 
 echo "Installing themes and extras..."
 
@@ -153,11 +170,33 @@ else
   echo "Skipped Antidote installation."
 fi
 
+echo "You may choose to install Visor-BootManager. ⚠️ If you do so and won't use the UKI setup later in the script, PLEASE comment the entries at the bottom of files/visor/boot.conf if you haven't already."
+read -p "Install Visor-BootManager ? [y/n] : " choice
+if [[ "$choice" == "y" ]]; then
+
+  echo "Installing Visor..."
+  sudo xbps-install -S gnu-efi-libs gcc make
+
+  wget https://github.com/IO-ZetZor/Visor-BootManager/archive/refs/tags/v1.5.6.tar.gz | tar xfj - -C
+  cp files/visor/icons/* Visor-BootManager-1.5.6/assets/icons/
+  cp files/visor/backgrounds/* Visor-BootManager-1.5.6/assets/backgrounds/
+  cp files/visor/gui_blur.c Visor-BootManager-1.5.6/src/gui/gui_blur.c
+  chmod +x Visor-BootManager-1.5.6/install.sh
+  ./Visor-BootManager-1.5.6/make
+  sudo ./Visor-BootManager-1.5.6/install.sh --boot-entry
+  sudo cp files/visor/boot.conf /boot/efi/EFI/visor/
+
+  echo "Visor has been installed. ⚠️ If you won't use the UKI setup later in the script, PLEASE comment the entries at the bottom of /boot/efi/EFI/visor/boot.conf if you haven't already."
+else
+  echo "Skipped Visor-BootManager installation."
+fi
+
 echo "Extras installed."
 
 
-
 # 04-CONFIG
+
+read -p "Perform dotfiles installation ? [Enter/Ctrl+C] : " answer
 
 echo "Copying dotfiles..."
 
@@ -170,6 +209,6 @@ cp -r Wallpapers ~/Pictures
 cp -r .local/share/fonts/CascadiaCode ~/.local/share/fonts/
 
 cp .zshrc ~/
-cp zsh_plugins.txt ~/
+cp .zsh_plugins.txt ~/
 
 echo "Dotfiles installed."
