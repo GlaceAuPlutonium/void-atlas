@@ -147,7 +147,7 @@ quarto add marimo-team/marimo-quarto
 22/09 - Found how to type emojis : just ctrl+c. Noctalia paste emojis into the clipboard.
 24/09 - FINALLY installed Visor Boot Manager (cloned and built from repo). Started tweaking boot.conf.
 25/09 - Baked CaskaydiaCove into the Visor EFI.
-26/09 - Modify Visor' src to fix unwated blurring behavior/bug. [ADD THE DIFF HERE] Recompiled.
+26/09 - Modify Visor' src to fix unwated blurring behavior/bug. Recompiled.
         Fix edge blurriness/uneven rounding by removing the feather function in the draw_frost function.
 +#define FROST_TINT_A 60
 +#define FROST_LIFT 8
@@ -233,8 +233,6 @@ fi
 
 ## TODO
 
-Make the dots and publish ts on github (or gitlab ? or codeberg ? or sourcehut ? or my own repo ? or something else
-
 EDID/MLCK fix (on pause for now, annoying)
 Power profiles (ppd or tlp)
 Fan profiles not powerful enough when plugged in ? cuz high temps (no pp/tlp yet), so see fan controls (prolly ayuz)
@@ -242,6 +240,7 @@ Fan profiles not powerful enough when plugged in ? cuz high temps (no pp/tlp yet
 Ayuz for ghelper in Linux (not in repo, might be hell to compile asus-ctl then ayuz)
 brightness/sound with touchpad (with ayuz ?) / already "configured" zones, sides of the trackpad not working, hardware-level control ?
 No session lock on lid closing/manual suspend (manually, lock from noctalia's zzz)
+Worse battery life on UKI ? Or am i just tripping balls ?
 Some nerdfont emojis not showing up in Zed and Noctalia (at least clipboard history)
 Noctalia-greeter power buttons (reboot/poweroff) ain't working (prob wrong command ?) (nectoalia-greeter removed for now)
 why is noctalia-greeter/greetd eating through my battery when its enabled ? (login from tty for now)
@@ -305,20 +304,7 @@ As usual, headphone in, playing music, lid closing, unplug, wait 20s, deadlock.
 Just got a god knows why the fuck its doing this weird ass deadlock, literally didn't do anything, just closed the lid back after like 10s.
 Actually its fucking random I just closed it with Zed opened, no music, for like 5min, and deadlock on wakeup.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+This is probably because the lid somehow sends back 2 zzz signals on closing (maybe by bouncing a bit ?)
 
 
 
@@ -349,30 +335,6 @@ Dump mémoire EC brute (ec_sys) → découverte d'un bit nommé SARF ("SAR Featu
 
 Conclusion actuelle
 Le mécanisme ACPI SAR attendu par le driver existe et répond, mais soit sa table ne suffit pas à expliquer tmac=3, soit il y a un bug de parsing non identifié dans le driver ou le firmware WM (juin 2026) sur cette combinaison ASUS/MT7922 précise. Pas de bug public documenté correspondant exactement à ce cas. Décision : contournement matériel (répéteur/point d'accès dans la chambre, ou Ethernet) plutôt que poursuivre l'investigation sur un terrain à risque (EC) ou incertain (recompilation/patch driver).
-
-
-
-udevgate (we can forget about this) :
-After UDEV battery rule applied :
-SUPER HIGH consumption/temps after resume for a long time (80°C + 30-35W consummed) when opening the lid + Noctalia battery tooltip suddenly refreshing a lot faster ?
-Weird reboot (see above), still super hot, 35W (instead of like 8-9 idle) and fans ramping up like crazy
-Removed udev battery rule, after a few dozens of seconds fan stops, temps go back normal (53°C), wattage goes down to 15-16W (still a bit high for what i used to get wiht just zed/kitty opened) and noctalia tooltip stopped refreshing every fucking second
-Restarted after this, normal behavior, wattage a bit high at startup (15W) slowly settles down to around 10W (instead of like 9-8.5)
-Started Zed to writes this, instantly ramps up to fucking 80°C and 35W just to start it, slowly cools down to 15-16W, usually around 13-14 when starting Zed and doing some stuff
-Not normal, because usually, AND I INSIST ON THIS : even with Firefox/Zed/kitty instances/music playing through MPV, it stays around 13-14W without a problem.
-PPowered off + manual boot, still too high at startup (16-17W) then ramps up to fucking 30W just to start Zed
-Just did manual reset (press power button for 40s), reboot, same problem, like 19W at startup and 35-40W when starting Zed, fan ramping up and down often, idling back down to 15W approx (instead of lower usually)
-Also the manual reset wiped the hardware clock so now it thinks its 2am in april 2025 (instead of like 6pm in july 2026) and i can't connect to claude
-
-And turns out it was just greetd running in the background and eating the battery
-
-
-
-
-
-
-
-
 
 
 
@@ -416,299 +378,3 @@ Add 'rootflags=subvol=@' kernel parameter to GRUB, then regen GRUB config/initra
 GRUB itself needs to be reinstalled through grub-install to lever the exact mountpoint change. Else 'error: /boot/grub/x86_64/normal.mod not found'.
 
 exit, umount -R /mnt, reboot
-
-
-
-
-
-
-## Installing 32bit GPU drivers :
-
-❯ sudo xbps-install mesa-dri-32bit vulkan-loader-32bit mesa-vulkan-radeon-32bit mesa-vaapi-32bit libvdpau-va-gl-32bit
-
-Name                     Action    Version           New version            Download size
-libxcrypt-compat-32bit   install   -                 4.4.38_1               95KB
-glibc-32bit              install   -                 2.41_1                 7994KB
-libXau-32bit             install   -                 1.0.12_2               5991B
-libXdmcp-32bit           install   -                 1.1.5_1                10KB
-libxcb-32bit             install   -                 1.17.0_1               233KB
-libX11-32bit             install   -                 1.8.13_1               728KB
-libglvnd-32bit           install   -                 1.7.0_1                245KB
-libXext-32bit            install   -                 1.3.7_1                30KB
-libXxf86vm-32bit         install   -                 1.1.6_2                9127B
-libpciaccess-32bit       install   -                 0.19_1                 19KB
-libdrm-32bit             install   -                 2.4.134_1              163KB
-expat-32bit              install   -                 2.8.2_1                78KB
-ncurses-libs-32bit       install   -                 6.5_2                  338KB
-libedit-32bit            install   -                 20260512.3.1_1         96KB
-libffi-32bit             install   -                 3.3_2                  17KB
-libgcc-32bit             install   -                 14.2.1+20250405_4      103KB
-libstdc++-32bit          install   -                 14.2.1+20250405_4      953KB
-libicu78-32bit           install   -                 78.3_1                 2613KB
-liblzma-32bit            install   -                 5.8.3_1                115KB
-libreadline8-32bit       install   -                 8.2.010_1              146KB
-zlib-32bit               install   -                 1.3.1_1                53KB
-libxml2-32bit            install   -                 2.13.8_3               639KB
-gmp-32bit                install   -                 6.3.0_1                259KB
-libz3-32bit              install   -                 4.15.8_1               12MB
-libzstd-32bit            install   -                 1.5.7_1                334KB
-libllvm21-32bit          install   -                 21.1.7_1               39MB
-bzip2-32bit              install   -                 1.0.8_2                34KB
-libelf-32bit             install   -                 0.195_1                361KB
-libsensors-32bit         install   -                 3.6.0_2                25KB
-libxshmfence-32bit       install   -                 1.3.3_2                3836B
-mesa-libgallium-32bit    install   -                 26.1.5_1               12MB
-libgbm-32bit             install   -                 26.1.5_1               7366B
-eudev-libudev-32bit      install   -                 3.2.14_2               82KB
-wayland-32bit            install   -                 1.26.0_1               67KB
-mesa-32bit               install   -                 26.1.5_1               807KB
-mesa-dri-32bit           install   -                 26.1.5_1               21KB
-vulkan-loader-32bit      install   -                 1.4.341.0_1            171KB
-mesa-vulkan-radeon-32bit install   -                 26.1.5_1               4048KB
-mesa-vaapi-32bit         install   -                 26.1.5_1               819B
-libXfixes-32bit          install   -                 6.0.2_1                9224B
-libva-32bit              install   -                 2.22.0_1               90KB
-libvdpau-va-gl-32bit     install   -                 0.4.2_2                77KB
-
-Size to download:               83MB
-Size required on disk:         289MB
-Space available on disk:       793GB
-
-Do you want to continue? [Y/n]
-
-
-## Installing steam :
-
-❯ sudo xbps-install -S steam                                                                      3s
-
-Name                      Action    Version           New version            Download size
-aalib                     install   -                 1.4rc5_3               38KB
-giflib                    install   -                 5.2.2_1                23KB
-libid3tag                 install   -                 0.16.4_1               35KB
-libspectre                install   -                 0.2.12_1               28KB
-imlib2                    install   -                 1.12.6_2               228KB
-libcaca                   install   -                 0.99.beta20_1          270KB
-taglib                    install   -                 2.3.1_1                521KB
-twolame                   install   -                 0.4.0_2                54KB
-libwavpack                install   -                 5.9.0_1                91KB
-gst-plugins-good1         install   -                 1.28.5_1               2648KB
-bubblewrap                install   -                 0.11.2_1               -
-xdg-dbus-proxy            install   -                 0.1.7_1                26KB
-libavif                   install   -                 1.4.2_1                321KB
-enchant2                  install   -                 2.8.14_1               45KB
-hyphen-en                 install   -                 26.2.0.3_1             94KB
-hyphen                    install   -                 2.8.8_4                16KB
-libmanette                install   -                 0.2.6_1                32KB
-libsecret                 install   -                 0.21.7_1               165KB
-gsettings-desktop-schemas install   -                 48.0_1                 -
-glib-networking           install   -                 2.80.1_1               158KB
-libsoup3                  install   -                 3.6.6_1                1623KB
-libwoff2common1.0.2       install   -                 1.0.2_1                4072B
-libwoff2dec1.0.2          install   -                 1.0.2_1                19KB
-libwebkitgtk60            install   -                 2.50.4_1               40MB
-zenity                    install   -                 4.0.5_1                3192KB
-liberation-fonts-ttf      install   -                 2.1.5_3                1691KB
-lsof                      install   -                 4.99.7_1               137KB
-steam-udev-rules          install   -                 1.0.0.61+20230830_1    3111B
-steam                     install   -                 1.0.0.85_1             19MB
-
-Size to download:               70MB
-Size required on disk:         181MB
-Space available on disk:       792GB
-
-Do you want to continue? [Y/n]
-
-
-Installing WINE32BIT
-
-Name                          Action    Version           New version            Download size
-libXi-32bit                   install   -                 1.8.2_2                33KB
-libXinerama-32bit             install   -                 1.1.6_1                4442B
-libXcomposite-32bit           install   -                 0.4.7_2                4467B
-libXrender-32bit              install   -                 0.9.12_1               20KB
-libXcursor-32bit              install   -                 1.2.3_2                22KB
-nettle-32bit                  install   -                 3.10.2_1               376KB
-libunistring-32bit            install   -                 1.0_1                  596KB
-libidn2-32bit                 install   -                 2.3.8_1                137KB
-libtasn1-32bit                install   -                 4.21.0_2               43KB
-p11-kit-32bit                 install   -                 0.26.4_1               653KB
-libcrypto3-32bit              install   -                 3.6.3_1                2015KB
-libssl3-32bit                 install   -                 3.6.3_1                479KB
-libevent-32bit                install   -                 2.1.13_1               221KB
-libsodium-32bit               install   -                 1.0.22_1               251KB
-libunbound-32bit              install   -                 1.25.2_1               553KB
-gnutls-32bit                  install   -                 3.8.13_1               989KB
-libXrandr-32bit               install   -                 1.5.4_1                19KB
-libXScrnSaver-32bit           install   -                 1.2.4_1                5666B
-alsa-lib-32bit                install   -                 1.2.16.1_1             535KB
-libpng-32bit                  install   -                 1.6.58_1               118KB
-brotli-32bit                  install   -                 1.2.0_2                366KB
-freetype-32bit                install   -                 2.14.3_1               396KB
-fontconfig-32bit              install   -                 2.17.1_1               151KB
-pixman-32bit                  install   -                 0.46.4_1               305KB
-libblkid-32bit                install   -                 2.41.4_1               185KB
-libmount-32bit                install   -                 2.41.4_1               220KB
-libpcre2-32bit                install   -                 10.47_1                588KB
-glib-32bit                    install   -                 2.88.0_1               1544KB
-lzo-32bit                     install   -                 2.10_3                 55KB
-cairo-32bit                   install   -                 1.18.4_2               641KB
-dbus-libs-32bit               install   -                 1.16.2_2               150KB
-libdav1d-32bit                install   -                 1.5.3_1                393KB
-libjpeg-turbo-32bit           install   -                 3.1.4.1_1              280KB
-libsharpyuv-32bit             install   -                 1.6.0_3                12KB
-libwebp-32bit                 install   -                 1.6.0_3                286KB
-jbigkit-libs-32bit            install   -                 2.2_2                  30KB
-tiff-32bit                    install   -                 4.7.1_2                229KB
-gdk-pixbuf-32bit              install   -                 2.42.12_2              142KB
-fribidi-32bit                 install   -                 1.0.16_1               26KB
-libdatrie-32bit               install   -                 0.2.14_1               16KB
-libthai-32bit                 install   -                 0.1.29_1               18KB
-graphite-32bit                install   -                 1.3.14_1               84KB
-libharfbuzz-32bit             install   -                 14.3.0_1               1227KB
-pango-32bit                   install   -                 1.56.3_2               254KB
-librsvg-32bit                 install   -                 2.59.2_2               2305KB
-libXdamage-32bit              install   -                 1.1.7_1                4704B
-atk-32bit                     install   -                 2.56.5_1               52KB
-libXtst-32bit                 install   -                 1.2.5_2                11KB
-at-spi2-core-32bit            install   -                 2.56.5_1               90KB
-at-spi2-atk-32bit             install   -                 2.56.5_1               76KB
-lcms2-32bit                   install   -                 2.19.1_1               185KB
-libusb-32bit                  install   -                 1.0.29_1               59KB
-json-glib-32bit               install   -                 1.10.8_1               64KB
-libgusb-32bit                 install   -                 0.4.9_1                38KB
-libcolord-32bit               install   -                 1.4.7_1                190KB
-avahi-libs-32bit              install   -                 0.8_2                  141KB
-libxcrypt-32bit               install   -                 4.4.38_1               95KB
-libcups-32bit                 install   -                 2.4.19_1               277KB
-libepoxy-32bit                install   -                 1.5.10_1               259KB
-libxkbcommon-32bit            install   -                 1.13.2_1               177KB
-gtk+3-32bit                   install   -                 3.24.52_1              3292KB
-libdecor-32bit                install   -                 0.2.5_1                46KB
-libICE-32bit                  install   -                 1.1.2_1                47KB
-libuuid-32bit                 install   -                 2.41.4_1               18KB
-libSM-32bit                   install   -                 1.2.6_1                16KB
-libasyncns-32bit              install   -                 0.8_9                  9148B
-libcap-32bit                  install   -                 2.78_1                 26KB
-libelogind-32bit              install   -                 252.39_1               248KB
-libgomp-32bit                 install   -                 14.2.1+20250405_4      160KB
-libfftw-32bit                 install   -                 3.3.11_1               1300KB
-libogg-32bit                  install   -                 1.3.6_1                21KB
-celt-32bit                    install   -                 0.11.3_3               50KB
-libdb-32bit                   install   -                 5.3.28_8               837KB
-libsamplerate-32bit           install   -                 0.2.2_1                1338KB
-opus-32bit                    install   -                 1.6.1_1                4010KB
-libjack-32bit                 install   -                 1.9.22_1               497KB
-libltdl-32bit                 install   -                 2.4.7_8                19KB
-libflac-32bit                 install   -                 1.5.0_1                253KB
-libvorbis-32bit               install   -                 1.3.7_1                198KB
-libmpg123-32bit               install   -                 1.33.7_1               242KB
-lame-32bit                    install   -                 4.0_1                  132KB
-libsndfile-32bit              install   -                 1.2.2_2                247KB
-libsoxr-32bit                 install   -                 0.1.3_2                94KB
-libtdb-32bit                  install   -                 1.4.15_1               47KB
-orc-32bit                     install   -                 0.4.42_1               338KB
-sbc-32bit                     install   -                 2.2_1                  35KB
-speexdsp-32bit                install   -                 1.2.1_1                43KB
-webrtc-audio-processing-32bit install   -                 1.3_1                  552KB
-libpulseaudio-32bit           install   -                 16.1_2                 1066KB
-SDL2-32bit                    install   -                 2.32.10_1              771KB
-wine-32bit                    install   -                 11.14_1                4301KB
-
-Size to download:               38MB
-Size required on disk:         150MB
-Space available on disk:       683GB
-
-Do you want to continue? [Y/n]
-
-
-
-
-
-August 3rd update :
-Name                     Action    Version           New version            Download size
-7zip                     update    26.01_1           26.02_1                1203KB
-LuaJIT                   update    2.1.1783773675_1  2.1.1785192264_1       407KB
-acl                      update    2.3.2_1           2.4.0_1                20KB
-attr                     update    2.5.2_2           2.6.0_1                9495B
-cava                     update    0.10.7_1          1.0.0_1                77KB
-ddcutil                  update    2.2.6_1           2.2.6_2                792KB
-dhcpcd                   update    10.3.1_1          10.3.2_1               200KB
-fastfetch                update    2.65.2_1          2.66.0_1               720KB
-firefox                  update    152.0.6_1         153.0.1_1              88MB
-fzf                      update    0.74.0_1          0.74.2_1               1899KB
-giflib                   update    5.2.2_1           6.1.3_1                47KB
-gpgmepp                  update    2.0.0_1           2.1.0_1                147KB
-graphviz-libs            update    15.0.0_1          15.1.0_1               515KB
-htop                     update    3.5.1_1           3.5.2_1                175KB
-kitty                    update    0.47.4_1          0.48.2_1               10MB
-kitty-kitten             update    0.47.4_1          0.48.2_1               8608KB
-kitty-shell-integration  update    0.47.4_1          0.48.2_1               25KB
-kitty-terminfo           update    0.47.4_1          0.48.2_1               2743B
-lame                     update    3.100_2           4.0_1                  262KB
-libarchive               update    3.8.8_1           3.8.9_1                371KB
-libbytesize              update    2.10_3            2.12_1                 17KB
-libcap-ng                update    0.8.5_4           0.9.3_1                14KB
-libcryptsetup            update    2.8.6_1           2.8.7_1                272KB
-libde265                 update    1.0.18_2          1.1.1_1                214KB
-libei                    update    1.5.0_1           1.6.0_1                87KB
-libevdev                 update    1.13.4_1          1.13.6_1               36KB
-libgbm                   update    26.1.5_1          26.1.6_1               6760B
-libgbm-32bit             update    26.1.5_1          26.1.6_1               7366B
-libgpgme                 update    2.0.1_1           2.1.2_1                149KB
-libharfbuzz              update    14.2.1_1          14.3.0_1               1248KB
-libheif                  update    1.23.0_2          1.23.1_1               818KB
-libidn2                  update    2.3.4_1           2.3.8_1                176KB
-libmpg123                update    1.33.5_2          1.33.7_1               224KB
-libnl3                   update    3.11.0_1          3.12.0_1               371KB
-libpoppler               update    26.06.0_1         26.07.0_1              1411KB
-libproxy                 update    0.5.11_1          0.5.12_1               24KB
-librist                  update    0.2.18_1          0.2.20_1               138KB
-libseccomp               update    2.5.5_1           2.6.1_1                56KB
-libsrt                   update    1.5.5_1           1.5.6_1                399KB
-libsynctex               update    20250308_2        20260301_1             45KB
-libunbound               update    1.25.1_1          1.25.2_1               542KB
-libupower-glib3          update    1.90.9_2          1.91.3_2               44KB
-libva                    update    2.22.0_1          2.24.1_1               95KB
-libva-32bit              update    2.22.0_1          2.24.1_1               94KB
-libvpl                   update    2.16.0_1          2.17.0_1               152KB
-libwacom                 update    2.19.0_1          2.19.1_1               181KB
-linux6.18                update    6.18.38_1         6.18.41_1              160MB
-linux7.1                 update    7.1.3_1           7.1.5_1                164MB
-linux7.1-headers         update    7.1.3_1           7.1.5_1                13MB
-mesa                     update    26.1.5_1          26.1.6_1               795KB
-mesa-32bit               update    26.1.5_1          26.1.6_1               807KB
-mesa-dri                 update    26.1.5_1          26.1.6_1               22KB
-mesa-dri-32bit           update    26.1.5_1          26.1.6_1               21KB
-mesa-libgallium          update    26.1.5_1          26.1.6_1               12MB
-mesa-libgallium-32bit    update    26.1.5_1          26.1.6_1               12MB
-mesa-vaapi               update    26.1.5_1          26.1.6_1               823B
-mesa-vaapi-32bit         update    26.1.5_1          26.1.6_1               819B
-mesa-vulkan-radeon       update    26.1.5_1          26.1.6_1               3787KB
-mesa-vulkan-radeon-32bit update    26.1.5_1          26.1.6_1               4052KB
-nghttp2                  update    1.69.0_1          1.70.0_1               978KB
-nghttp3                  update    1.16.0_1          1.18.0_1               73KB
-ngtcp2                   update    1.24.0_1          1.25.0_1               174KB
-noto-fonts-ttf           update    2026.07.01_1      2026.08.01_1           17MB
-nss                      update    3.125_1           3.126_1                2747KB
-openssh                  update    10.4p1_1          10.4p1_2               1396KB
-orc                      update    0.4.41_2          0.4.42_1               329KB
-pinentry                 update    1.3.2_1           1.3.3_1                56KB
-poppler                  update    26.06.0_1         26.07.0_1              249KB
-removed-packages         update    0.1.20260619_1    0.1.20260702_1         9582B
-ripgrep                  update    15.1.0_1          15.2.0_1               1649KB
-sbc                      update    2.0_1             2.2_1                  50KB
-sqlite                   update    3.53.2_1          3.53.4_1               1226KB
-swaylock                 update    1.8.5_1           1.8.6_1                32KB
-tpm2-tss                 update    4.1.3_1           4.2.0_3                528KB
-upower                   update    1.90.9_2          1.91.3_2               128KB
-vulkan-loader            update    1.4.341.0_1       1.4.350.1_1            162KB
-vulkan-loader-32bit      update    1.4.341.0_1       1.4.350.1_1            173KB
-x264                     update    20250402.165_1    20250402.165_2         779KB
-xorg-server-xwayland     update    24.1.9_2          24.1.13_2              1016KB
-xwayland-satellite       update    0.8.1_1           0.8.2_1                1720KB
-
-Size to download:              522MB
-Size required on disk:        1007MB
-Space available on disk:       774GB
-
-Do you want to continue? [Y/n]
