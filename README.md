@@ -1,12 +1,12 @@
 # This repo is still being built and a work in project
 
-This repository is a collection of dotfiles and system-level optimisation and configuration, aimed at Void Linux user. \
-Ofc anyone can use these ressources, you may adapt them to fit your system. \
-For my fellow Void users (and power-user type other ppl), you'll find a lot of small system config files you may find useful.
+A collection of dotfiles and system-level optimisation and configuration, aimed at Void Linux user. \
+\
+This repo serves two purposes :
+1. My daily-driver setup
+2. Some collection of Void Linux and hardware-specific tweaks, config and info you may use if you want
 
 I've tried documenting everything in this setup and explaining how everything works, so check the README below ! ***[below doesn't exists for now]***
-
-**the annoying disclaimer** : this is my personnal setup, it's optimised for my hardware, you may take what you want and use the install script, but at no point is this some 'ready to go' or made for everyone. Some things may not work on your machine, so double check before using them.
 
 # Main components
 
@@ -33,6 +33,17 @@ This setup is being tested on the following hardware :
 - **iGPU** : Radeon 890M
 - **RAM** : 32GB LPDDR5X-7500
 - **Display** : 16" 3200x2000 120Hz OLED
+- **Wifi** : MediaTek MT7922
+
+### Repositories
+There are 2 repositories :
+- [Codeberg](https://codeberg.org/GlaceAuPlutonium/void-atlas) : Main repo. Please go there for PRs, issues, dicussions, wiki (there isn't a wiki for now), etc..
+- [Github](https://github.com/GlaceAuPlutonium/void-atlas) : Mirror repo. Synced 1h appart from main one.
+
+### Disclaimer
+This is a personal, hardware-specific setup. This isn't a ready-to-go install script. You can use these resources and adapt them to your system, but blindly copying things may break your setup. Don't be dumb, check what X thing do before applying it.
+
+
 
 # Installation
 first need to remake the install scripts and then explain evertyhing
