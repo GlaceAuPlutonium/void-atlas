@@ -41,7 +41,7 @@ There are 2 repositories :
 - [Github](https://github.com/GlaceAuPlutonium/void-atlas) : Mirror repo. Synced 1h appart from main one.
 
 ### Disclaimer
-This is a personal, hardware-specific setup. This isn't a ready-to-go install script. You can use these resources and adapt them to your system, but blindly copying things may break your setup. Don't be dumb, check what X thing do before applying it.
+This is a personal, hardware-specific setup. This isn't a ready-to-go install script for everyone. You can use these resources and adapt them to your system, but blindly copying things may break your setup. Don't be dumb, check what X thing do before applying it.
 
 
 
