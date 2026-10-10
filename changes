@@ -240,6 +240,9 @@ fi
         Peaking 4095, 1.5Q, 3.4dB
         Highshelf, 10000, 0.7Q, 2.8dB
 
+
+10/10 - Compressed background images (wp and visor) using 'oxipng -o max -z --fast --strip safe -v *.png'
+
 --
 
 
