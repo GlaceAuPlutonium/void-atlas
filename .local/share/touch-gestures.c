@@ -1,16 +1,13 @@
 /*
- * touchpad-edge : sliders tactiles sur les bords du touchpad.
- * Meme logique qu'Ayuz (src/services/edge_gestures.rs), sans GUI ni runtime.
+ * 'smart' gestures on trackpad edge : volume, brightness, media control
+ * rewrite in C of Ayuz's implementation of Asus' Smart Gestures, check the original project at https://github.com/Traciges/Ayuz
  *
- *   bord gauche : glisser haut/bas       -> volume
- *   bord droit  : glisser haut/bas       -> luminosite
- *   bord haut   : glisser gauche/droite  -> avancer/reculer dans le media
+ * left :  volume
+ * right : brightness
+ * top : media +- 5s
  *
- * Lecture passive de /dev/input/eventN (pas de grab) : libinput continue de
- * gerer le touchpad normalement.
- *
- * Build : cc -O2 -Wall -o touchpad-edge touchpad-edge.c $(pkg-config --cflags --libs libevdev)
- * Usage : touchpad-edge [-d] [/dev/input/eventN]     (-d : affiche ce qui est detecte)
+ * build : cc -O2 -Wall -o touch-gestures touch-gestures.c $(pkg-config --cflags --libs libevdev)
+ * syntax : touchpad-edge [-d] [/dev/input/eventN] (-d for debug)
  */
 #define _GNU_SOURCE
 #include <dirent.h>
@@ -24,8 +21,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#define EDGE 0.04 /* largeur des zones de bord (fraction de la largeur/hauteur) */
-#define STEP 0.05 /* glissement necessaire pour un cran (fraction de la taille)  */
+#define EDGE 0.04 /* edge size (width/height %) */
+#define STEP 0.05 /* sliding required for one step (size %)  */
 
 extern char **environ;
 enum zone { IDLE, CLASSIFY, LEFT, RIGHT, TOP, OTHER };
@@ -42,19 +39,19 @@ static void run(char *const argv[])
 	posix_spawn_file_actions_init(&fa);
 	posix_spawn_file_actions_addopen(&fa, 1, "/dev/null", O_WRONLY, 0);
 	posix_spawn_file_actions_addopen(&fa, 2, "/dev/null", O_WRONLY, 0);
-	/* SIG_IGN sur SIGCHLD est herite a travers exec : on le remet par defaut chez l'enfant */
+	/* SIG_IGN on SIGCHLD inherited through exec : reset it to default in the child */
 	sigemptyset(&def);
 	sigaddset(&def, SIGCHLD);
 	posix_spawnattr_init(&at);
 	posix_spawnattr_setsigdefault(&at, &def);
 	posix_spawnattr_setflags(&at, POSIX_SPAWN_SETSIGDEF);
 	if (posix_spawnp(&pid, argv[0], &fa, &at, argv, environ) != 0 && debug)
-		fprintf(stderr, "impossible de lancer %s\n", argv[0]);
+		fprintf(stderr, "can't launch %s\n", argv[0]);
 	posix_spawnattr_destroy(&at);
 	posix_spawn_file_actions_destroy(&fa);
 }
 
-/* dir > 0 : haut (bords gauche/droit) ou droite (bord haut) */
+/* dir > 0 : up (left/right edge) or right (top edge) */
 static void act(enum zone z, int dir)
 {
 	if (debug)
@@ -69,7 +66,6 @@ static void act(enum zone z, int dir)
 		run((char *const[]){ "brightnessctl", "set", dir > 0 ? "5%+" : "5%-", NULL });
 		break;
 	case TOP:
-		/* pour changer de piste a la place : "next" / "previous" */
 		run((char *const[]){ "playerctl", "position", dir > 0 ? "5+" : "5-", NULL });
 		break;
 	default:
@@ -138,14 +134,14 @@ int main(int argc, char **argv)
 		else
 			forced = argv[i];
 	}
-	signal(SIGCHLD, SIG_IGN); /* les wpctl/brightnessctl lances sont recoltes automatiquement */
+	signal(SIGCHLD, SIG_IGN); /* launched wpctl/brightnessctl processes automatically repeated */
 
 	dev = open_touchpad(forced);
 	if (!dev) {
-		fprintf(stderr, "touchpad introuvable (utilisateur dans le groupe input ?)\n");
+		fprintf(stderr, "No touchpad found (user in input group ? touchpad input owned by user ?)\n");
 		return 1;
 	}
-	/* Source des coordonnees : ABS_X/Y emulees si presentes, sinon slot 0 du MT */
+	/* coordinates source : ABS_X/Y emulated if here, else slot 0 of MT */
 	use_mt = !libevdev_has_event_code(dev, EV_ABS, ABS_X);
 	xmin = libevdev_get_abs_minimum(dev, use_mt ? ABS_MT_POSITION_X : ABS_X);
 	xmax = libevdev_get_abs_maximum(dev, use_mt ? ABS_MT_POSITION_X : ABS_X);
@@ -160,7 +156,7 @@ int main(int argc, char **argv)
 
 	for (;;) {
 		rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL | LIBEVDEV_READ_FLAG_BLOCKING, &ev);
-		if (rc == LIBEVDEV_READ_STATUS_SYNC) { /* evenements perdus : on repart de zero */
+		if (rc == LIBEVDEV_READ_STATUS_SYNC) { /* events lost: starts from zeo */
 			while (libevdev_next_event(dev, LIBEVDEV_READ_FLAG_SYNC, &ev) == LIBEVDEV_READ_STATUS_SYNC)
 				;
 			zone = IDLE;
@@ -169,7 +165,7 @@ int main(int argc, char **argv)
 		if (rc == -EAGAIN || rc == -EINTR)
 			continue;
 		if (rc < 0) {
-			fprintf(stderr, "lecture : %s\n", strerror(-rc));
+			fprintf(stderr, "reading : %s\n", strerror(-rc));
 			return 1;
 		}
 
@@ -197,12 +193,12 @@ int main(int argc, char **argv)
 				multi = 1;
 			}
 		} else if (ev.type == EV_SYN && ev.code == SYN_REPORT) {
-			/* Un seul doigt, sinon c'est du scroll/zoom : on ignore jusqu'a la levee */
+			/* one finger only */
 			if (multi && zone != IDLE)
 				zone = OTHER;
 
 			if (zone == CLASSIFY) {
-				/* La zone est decidee d'apres le premier contact */
+				/* zone determined from 1st contact */
 				if (x < edge_l) {
 					zone = LEFT;
 					anchor = y;
