@@ -54,7 +54,7 @@ fi
 read -p "Install DESKTOP related components ? (DOES NOT INSTALL NOCTALIA) [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Installing desktop stuff..."
-  sudo xbps-install -S niri wofi slurp grim wl-clipboard cliphist wlr-randr wlsunset xdg-desktop-portal xdg-desktop-portal-wlr xwayland-satellite playerctl brightnessctl ddcutil
+  sudo xbps-install -S niri wofi slurp grim wl-clipboard cliphist wlr-randr wlsunset xwayland-satellite playerctl brightnessctl ddcutil
 else
   echo "Skipped desktop installation."
 fi
@@ -114,10 +114,10 @@ fi
 read -p "Set up Pipewire ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
   echo "Setting up Pipewire..."
-  sudo usermod -aG audio,video gap
+  sudo usermod -aG audio,video "$USER"
   sudo mkdir -p /etc/pipewire/pipewire.conf.d
-  sudo ln -s /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
-  sudo ln -s /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
+  sudo ln -s -f /usr/share/examples/wireplumber/10-wireplumber.conf /etc/pipewire/pipewire.conf.d/
+  sudo ln -s -f /usr/share/examples/pipewire/20-pipewire-pulse.conf /etc/pipewire/pipewire.conf.d/
 else
   echo "Skipped Pipewire setup."
 fi
@@ -195,7 +195,7 @@ if [[ "$choice" == "y" ]]; then
   cp files/visor/gui_blur.c Visor-BootManager-1.5.6/src/gui/gui_blur.c
   chmod +x Visor-BootManager-1.5.6/install.sh
   make -C Visor-BootManager-1.5.6
-  sudo ./Visor-BootManager-1.5.6/install.sh --boot-entry
+  cd Visor-BootManager-1.5.6 && sudo ./install.sh --boot-entry && cd ..
   sudo cp files/visor/boot.conf /boot/efi/EFI/visor/
 
   echo "Visor has been installed. ⚠️ If you won't use the UKI setup later in the script, PLEASE comment the entries at the bottom of /boot/efi/EFI/visor/boot.conf if you haven't already."
