@@ -132,6 +132,18 @@ read -p "Perform extras installation ? [Enter/Ctrl+C] : " answer
 
 echo "Installing themes and extras..."
 
+# CaskaydiaCove Font
+read -p "Install CaskaydiaCove font ? [y/n] : " choice
+if [[ "$choice" == "y" ]]; then
+  echo "Installing font..."
+  mkdir -p ~/.local/share/fonts/CascadiaCode
+  curl -fSL https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/CascadiaCode.zip -o /tmp/CascadiaCode.zip \
+  && 7zip x -y -o"$HOME/.local/share/fonts/CascadiaCode" /tmp/CascadiaCode.zip \
+  && fc-cache -f
+else
+  echo "Skipped font installation."
+fi
+
 # TokyoNight GTK Theme
 read -p "Install Tokyonight GTK Theme ? [y/n] : " choice
 if [[ "$choice" == "y" ]]; then
@@ -177,12 +189,12 @@ if [[ "$choice" == "y" ]]; then
   echo "Installing Visor..."
   sudo xbps-install -S gnu-efi-libs gcc make
 
-  wget -O - https://github.com/IO-ZetZor/Visor-BootManager/archive/refs/tags/v1.5.6.tar.gz | tar xfz -
+  wget -O - https://github.com/IO-ZetZor/Visor-BootManager/archive/refs/tags/v1.5.6.tar.gz | tar xzf -
   cp files/visor/icons/* Visor-BootManager-1.5.6/assets/icons/
   cp files/visor/backgrounds/* Visor-BootManager-1.5.6/assets/backgrounds/
   cp files/visor/gui_blur.c Visor-BootManager-1.5.6/src/gui/gui_blur.c
   chmod +x Visor-BootManager-1.5.6/install.sh
-  ./Visor-BootManager-1.5.6/make
+  make -C Visor-BootManager-1.5.6
   sudo ./Visor-BootManager-1.5.6/install.sh --boot-entry
   sudo cp files/visor/boot.conf /boot/efi/EFI/visor/
 
@@ -200,15 +212,13 @@ read -p "Perform dotfiles installation ? [Enter/Ctrl+C] : " answer
 
 echo "Copying dotfiles..."
 
-mkdir -p ~/.local/share/fonts
-
 mkdir -p ~/Pictures
 
 cp -r .config ~/
-cp -r Wallpapers ~/Pictures
-cp -r .local/share/fonts/CascadiaCode ~/.local/share/fonts/
-
 cp .zshrc ~/
 cp .zsh_plugins.txt ~/
+
+git clone --depth 1 https://codeberg.org/GlaceAuPlutonium/void-atlas-wp ~/Pictures
+
 
 echo "Dotfiles installed."

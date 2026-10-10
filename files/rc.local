@@ -10,9 +10,9 @@ echo 80 > /sys/class/power_supply/BAT1/charge_control_end_threshold
 
 echo 1 > /sys/power/pm_debug_messages
 
-#(
-#	for i in 1 2 3 4 5 6 7 8 9 10; do
-#		echo 80 > /sys/class/power_supply/BAT1/charge_end_control_threshold 2>/dev/null && break
-#		sleep 1
-#	done
-#) &
+for d in /sys/class/input/event*; do
+    if grep -qi touchpad "$d/device/name" 2>/dev/null; then
+        chown gap "/dev/input/${d##*/}"
+    fi
+done
+
