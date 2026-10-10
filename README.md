@@ -8,6 +8,8 @@ This repo serves two purposes :
 
 I've tried documenting everything in this setup and explaining how everything works, so check the README below ! ***[below doesn't exists for now]***
 
+Wallpapers available on [void-atlas-wp](https://codeberg.org/GlaceAuPlutonium/void-atlas-wp) !
+
 # Main components
 
 | Component | Choice | Notes |
