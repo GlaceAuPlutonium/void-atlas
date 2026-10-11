@@ -1,6 +1,6 @@
 # This repo is still being built and a work in project
 
-A collection of dotfiles and system-level optimisation and configuration, aimed at Void Linux user. \
+A collection of dotfiles and system-level optimisation and configuration for Asus laptops, aimed at Void Linux user. \
 \
 This repo serves two purposes :
 1. My daily-driver setup
@@ -44,8 +44,6 @@ There are 2 repositories :
 
 ### Disclaimer
 This is a personal, hardware-specific setup. This isn't a ready-to-go install script for everyone. You can use these resources and adapt them to your system, but blindly copying things may break your setup. Don't be dumb, check what X thing do before applying it.
-
-
 
 # Installation
 first need to remake the install scripts and then explain evertyhing

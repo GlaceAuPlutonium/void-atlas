@@ -240,8 +240,28 @@ fi
         Peaking 4095, 1.5Q, 3.4dB
         Highshelf, 10000, 0.7Q, 2.8dB
 
-
 10/10 - Compressed background images (wp and visor) using 'oxipng -o max -z --fast --strip safe -v *.png'
+11/10 - Added button/script to Noctalia to switch framerate mode (60/120)
+11/10 - Added Noctalia button to switch platform profile with following script :
+        #!/bin/sh
+        # /usr/local/bin/toggle-profile
+        f=/sys/firmware/acpi/platform_profile
+        if [ "$(cat "$f")" = "performance" ]; then
+            new=balanced
+        else
+            new=performance
+        fi
+        echo "$new" > "$f"
+        echo "$new"
+
+        Copied with root ownership with 'sudo install -o root -g root -m 755 toggle-profile /usr/local/bin/toggle-profile'
+        Added 'gap ALL=(root) NOPASSWD: /usr/local/bin/toggle-profile' to /etc/sudoers.d/toggle-profile
+        Then added small shell script to be launching by Noctalia :
+        #!/bin/bash
+        new=$(sudo -n /usr/local/bin/toggle-profile) || exit 1
+        qs -c noctalia-shell ipc call toast send '{"title": "'"${new^}"'", "body": "Platform profile set to '"$new"'", "icon": "file-power", "duration": 6000}'
+
+
 
 --
 
@@ -252,7 +272,6 @@ fi
 ## TODO
 
 EDID/MLCK fix (on pause for now, annoying)
-Power profiles (ppd or tlp)
 Fan profiles ?
 
 Ayuz for ghelper in Linux (not in repo, might be hell to compile asus-ctl then ayuz)
@@ -260,11 +279,10 @@ No session lock on lid closing/manual suspend (manually, lock from noctalia's zz
 Some nerdfont emojis not showing up in Zed and Noctalia (at least clipboard history)
 Noctalia-greeter power buttons (reboot/poweroff) ain't working (prob wrong command ?) (nectoalia-greeter removed for now)
 why is noctalia-greeter/greetd eating through my battery when its enabled ? (login from tty for now)
-Check ly greeterNoctalia-greeter power buttons (reboot/poweroff) ain't working (prob wrong command ?) (nectoalia-greeter removed for now)
+Check ly greeter
 Sudo permissions/auth with yazi ?
 Basically recheck every single yazi plugin possible
 HDR ? brighter screen ? (out of curiosity)
-60Hz/120Hz
 External monitor support/config etc..
 Automatic keyboardbacklight poweroff after inactivity (ayuz says its done with swayidle)
 OSD for things like FN etc ?
@@ -282,6 +300,7 @@ install mpd for music maybe ?
 See whats small games to install on here, top of mind : Minecraft (prism), AoE2DE (crack, wont work), Linux native games
 Do I install my astro-processing softwares ? (siril, graxpert, stellarium, etc..)
 What software to install for college notes/stuff ? (logseq may be goofy, see other os alternatives)
+check tlp
 only sometimes the USB4.0 port won't charge ?? (not recognized as plugged in), only seems to happen after a zzz happened, works fine when pluggin at startup
 Fuckass lid crashing problem (probably double acpi close events being sent; handler.sh doesn't check for running zzz process) (no big deal now)
 Install noctalia v5 (bottom priority) (goofy ass control center)
