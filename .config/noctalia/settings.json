@@ -326,9 +326,7 @@
                 },
                 {
                     "id": "WallpaperSelector"
-                }
-            ],
-            "right": [
+                },
                 {
                     "enableOnStateLogic": false,
                     "generalTooltipText": "Dark Mode",
@@ -339,9 +337,33 @@
                     "onRightClicked": "",
                     "showExecTooltip": false,
                     "stateChecksJson": "[]"
+                }
+            ],
+            "right": [
+                {
+                    "enableOnStateLogic": true,
+                    "generalTooltipText": "Switch Framerate",
+                    "icon": "keyframes",
+                    "id": "CustomButton",
+                    "onClicked": "~/.config/noctalia/frameRate.sh",
+                    "onMiddleClicked": "",
+                    "onRightClicked": "",
+                    "showExecTooltip": false,
+                    "stateChecksJson": "[{\"command\":\"[ \\\"$(wlr-randr | awk '/current/ {print int($3 + 0.5)}')\\\" = 120 ]\",\"icon\":\"keyframes\"}]"
                 },
                 {
                     "id": "NightLight"
+                },
+                {
+                    "enableOnStateLogic": true,
+                    "generalTooltipText": "Switch Platform Profile",
+                    "icon": "file-power",
+                    "id": "CustomButton",
+                    "onClicked": "~/.config/noctalia/platformProfile.sh",
+                    "onMiddleClicked": "",
+                    "onRightClicked": "",
+                    "showExecTooltip": false,
+                    "stateChecksJson": "[{\"command\":\"[ \\\"$(cat /sys/firmware/acpi/platform_profile)\\\" = performance ]\",\"icon\":\"file-power\"}]"
                 },
                 {
                     "id": "KeepAwake"
@@ -495,7 +517,7 @@
         "firstDayOfWeek": 1,
         "hideWeatherCityName": false,
         "hideWeatherTimezone": false,
-        "name": "Paris",
+        "name": "Grenoble",
         "showCalendarEvents": true,
         "showCalendarWeather": true,
         "showWeekNumberInCalendar": true,
@@ -506,7 +528,7 @@
         "weatherTaliaMascotAlways": false
     },
     "network": {
-        "bluetoothAutoConnect": true,
+        "bluetoothAutoConnect": false,
         "bluetoothDetailsViewMode": "grid",
         "bluetoothHideUnnamedDevices": false,
         "bluetoothRssiPollIntervalMs": 56000,

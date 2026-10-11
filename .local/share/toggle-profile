@@ -1,0 +1,10 @@
+#!/bin/sh
+# /usr/local/bin/toggle-profile
+f=/sys/firmware/acpi/platform_profile
+if [ "$(cat "$f")" = "performance" ]; then
+    new=balanced
+else
+    new=performance
+fi
+echo "$new" > "$f"
+echo "$new"
