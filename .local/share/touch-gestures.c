@@ -58,7 +58,6 @@ static void act(enum zone z, int dir)
 		printf("%s %s\n", zone_name[z], dir > 0 ? "+" : "-");
 	switch (z) {
 	case LEFT:
-		run((char *const[]){ "wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "0", NULL });
 		run((char *const[]){ "wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@",
 				     dir > 0 ? "2%+" : "2%-", NULL });
 		break;

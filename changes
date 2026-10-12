@@ -262,6 +262,7 @@ fi
         qs -c noctalia-shell ipc call toast send '{"title": "'"${new^}"'", "body": "Platform profile set to '"$new"'", "icon": "file-power", "duration": 6000}'
 
 
+11/10 - Added auto kb_backlight idle with swayidle spawn-at-startup and 'chown gap /sys/class/leds/asus::kbd_backlight/brightness' in rc.local
 
 --
 
@@ -282,9 +283,7 @@ why is noctalia-greeter/greetd eating through my battery when its enabled ? (log
 Check ly greeter
 Sudo permissions/auth with yazi ?
 Basically recheck every single yazi plugin possible
-HDR ? brighter screen ? (out of curiosity)
 External monitor support/config etc..
-Automatic keyboardbacklight poweroff after inactivity (ayuz says its done with swayidle)
 OSD for things like FN etc ?
 Screen always at 40% on startup ? Why ??
     Actually: Screen starts off at 40% brightness (physically, i can see it). But computer thinks it's at 50%.
@@ -307,6 +306,7 @@ Install noctalia v5 (bottom priority) (goofy ass control center)
 Installing an LLM that would run efficiently on the laptop ? Also bottom priority²
 "replace" gcc with clang (partly, frontend) and ninja with samurai
 See if i can change Firefox theme once battery is connected (just for fun)
+HDR when implemented in upstream Smithay/niri
 
 PROBLEMS (not now):
 MCLK EDID fix not working

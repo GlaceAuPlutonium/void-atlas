@@ -130,6 +130,7 @@ spawn-at-startup "pipewire"
 spawn-at-startup "udiskie"
 spawn-at-startup "qs" "-c" "noctalia-shell"
 spawn-at-startup "/home/gap/.local/bin/touch-gestures"
+spawn-at-startup "swayidle" "-w" "timeout" "240" "brightnessctl -d asus::kbd_backlight -s set 0" "resume" "brightnessctl -d asus::kbd_backlight -r"
 
 // Uncomment this line to ask the clients to omit their client-side decorations if possible.
 // If the client will specifically ask for CSD, the request will be honored.
