@@ -263,6 +263,8 @@ fi
 
 
 11/10 - Added auto kb_backlight idle with swayidle spawn-at-startup and 'chown gap /sys/class/leds/asus::kbd_backlight/brightness' in rc.local
+12/10 - Disabled touch-gestures, suspecting it deadlocks on lid closing (??), added it back, seems to work fine actually
+14/40 - Fixed wrong brightness at startup, added 'echo 160000 > /sys/class/backlight/amdgpu_bl0/brightness' to rc.local
 
 --
 
@@ -275,20 +277,13 @@ fi
 EDID/MLCK fix (on pause for now, annoying)
 Fan profiles ?
 
-Ayuz for ghelper in Linux (not in repo, might be hell to compile asus-ctl then ayuz)
 No session lock on lid closing/manual suspend (manually, lock from noctalia's zzz)
-Some nerdfont emojis not showing up in Zed and Noctalia (at least clipboard history)
 Noctalia-greeter power buttons (reboot/poweroff) ain't working (prob wrong command ?) (nectoalia-greeter removed for now)
 why is noctalia-greeter/greetd eating through my battery when its enabled ? (login from tty for now)
 Check ly greeter
 Sudo permissions/auth with yazi ?
 Basically recheck every single yazi plugin possible
 External monitor support/config etc..
-OSD for things like FN etc ?
-Screen always at 40% on startup ? Why ??
-    Actually: Screen starts off at 40% brightness (physically, i can see it). But computer thinks it's at 50%.
-    So when i press my key to lower by 5% (to get to 35%), computer thinks it's at 50% to it lowers to 45%, meaning my brightness actually get higher.
-    Need to press my key again to lower to 40% like at startup and more to lower more.
 Can't press Enter in file choosing (GTK popup) to validate (also sometimes window opening in fs float, a way to reduce the size ?)
 libreoffice highdpi scaling problem
     blurry cursor -> x11/xwayland related ?
@@ -296,7 +291,6 @@ Revise complicated Niri bindings
 What is being used, ntfs-3g or new 7.0 ntfs3 driver ?
 in-depth zed config (prolly crapton of things i don't need)
 install mpd for music maybe ?
-See whats small games to install on here, top of mind : Minecraft (prism), AoE2DE (crack, wont work), Linux native games
 Do I install my astro-processing softwares ? (siril, graxpert, stellarium, etc..)
 What software to install for college notes/stuff ? (logseq may be goofy, see other os alternatives)
 check tlp
@@ -307,6 +301,7 @@ Installing an LLM that would run efficiently on the laptop ? Also bottom priorit
 "replace" gcc with clang (partly, frontend) and ninja with samurai
 See if i can change Firefox theme once battery is connected (just for fun)
 HDR when implemented in upstream Smithay/niri
+Finding a use case for FN keys ? (F7, F8, F10, F11, F12)
 
 PROBLEMS (not now):
 MCLK EDID fix not working

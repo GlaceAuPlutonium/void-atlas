@@ -16,3 +16,6 @@ for d in /sys/class/input/event*; do
     fi
 done
 
+chown gap /sys/class/leds/asus::kbd_backlight/brightness
+
+echo 160000 > /sys/class/backlight/amdgpu_bl0/brightness
