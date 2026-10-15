@@ -58,8 +58,14 @@ there will be a lot here
 i'll add it
 
 # Credits
-[Void Linux](https://voidlinux.org) for being the amazing distro that it is. [Noctalia](https://noctalia.dev) for developping Noctalia Shell. [Voiders Repo](https://git.voiders.dev/voiders-community/repository) for providing xbps-src build templates for noctalia-shell and noctalia-qs. [Ayuz](https://github.com/Traciges/Ayuz) for original 'Smart Gestures' implementation. [Visor](https://github.com/IO-ZetZor/Visor-BootManager) for the bootloader. \
-The wallpapers I provide for Visor belongs to their respective creators and can be found on [Wallhaven](https://wallhaven.cc)
+[Void Linux](https://voidlinux.org) for being the amazing distro that it is. \
+[Noctalia](https://noctalia.dev) for developping Noctalia Shell. \
+[Voiders Repo](https://git.voiders.dev/voiders-community/repository) for providing xbps-src build templates for noctalia-shell and noctalia-qs. \
+[Ayuz](https://github.com/Traciges/Ayuz) for original 'Smart Gestures' implementation. \
+[Visor](https://github.com/IO-ZetZor/Visor-BootManager) for the bootloader. \
+The wallpapers I provide for Visor belong to their respective creators and can be found on [Wallhaven](https://wallhaven.cc). \
+\
+Also anyone that might one day find a fix for this stupid MT7922 wifi power problem.
 
 # License
 i'll add a license
