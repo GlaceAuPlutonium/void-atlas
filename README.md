@@ -49,7 +49,17 @@ This is a personal, hardware-specific setup. This isn't a ready-to-go install sc
 first need to remake the install scripts and then explain evertyhing
 
 # Documentation
-i havent even written the installation section and scripts what kind of documentation are you expecting 
+i havent even finished writting the installation section and scripts what kind of documentation are you expecting 
 
 # Others, notes, bug, etc...
 there will be a lot here
+
+# Contributing
+i'll add it
+
+# Credits
+[Void Linux](https://voidlinux.org) for being the amazing distro that it is. [Noctalia](https://noctalia.dev) for developping Noctalia Shell. [Voiders Repo](https://git.voiders.dev/voiders-community/repository) for providing xbps-src build templates for noctalia-shell and noctalia-qs. [Ayuz](https://github.com/Traciges/Ayuz) for original 'Smart Gestures' implementation. [Visor](https://github.com/IO-ZetZor/Visor-BootManager) for the bootloader. \
+The wallpapers I provide for Visor belongs to their respective creators and can be found on [Wallhaven](https://wallhaven.cc)
+
+# License
+i'll add a license

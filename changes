@@ -284,7 +284,6 @@ Check ly greeter
 Sudo permissions/auth with yazi ?
 Basically recheck every single yazi plugin possible
 External monitor support/config etc..
-Can't press Enter in file choosing (GTK popup) to validate (also sometimes window opening in fs float, a way to reduce the size ?)
 libreoffice highdpi scaling problem
     blurry cursor -> x11/xwayland related ?
 Revise complicated Niri bindings
