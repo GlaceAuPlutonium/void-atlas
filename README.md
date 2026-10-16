@@ -52,10 +52,44 @@ first need to remake the install scripts and then explain evertyhing
 i havent even finished writting the installation section and scripts what kind of documentation are you expecting 
 
 # Others, notes, bug, etc...
-there will be a lot here
+## MT7922 WiFi chip being capped at 3dBm of power
+This is the biggest problem right now on this computer, and possibly other similar setup. **Currently haven't found a fix.** \
+The WiFi chip gets stuck in lower power mode and won't pull above 3dBm of power, as opposed to the ~15-20dBm it should normally draw, which makes the WiFi range absolutely abysmal (No wifi signal above 12m, after several tests). \
+I suspect this is due to some specific SAR table (which regulates wireless devices power draws based on local regulations) being exposed by the laptop firmware, but the wifi driver fails to read it, and caps the chip into some "safe" or "low power" mode, which also makes txpower also sends back the 3dBm value. \
+\
+Here's some investigation/debugging report showing what was done, tested etc... if you feel interested. Maybe you'll find something useful in there. Sorry if it's poorly written. \
+\
+### Breakdown of wifi mt7921/mt7922 debug - TX power capped at 3dBm
+Symptom : obnoxiously bad signal range in a room "far" from router (12 meters, ping 6000-7000ms), wavemon shows tx power: 3dBm intsead of 15-20dBm expected.
+### Leads tested and results
+
+iw phy set txpower fixed → silently ignored. Confirm that the cap is applied deeper, not in userspace. \
+iw reg set FR → no effects, stays at country 00. Ruled out as cause, domain "00" allows up to 20dBm in 2.4GHz. \
+txpower_sku (debugfs) → shows real structure : eeprom (chip calibration) = healthy values 37-41 ; tmac (actual limit applied by the firmware) = 3 everywhere, on all bitrates, all bandwidths. -r-- file, no quick test through simple echo. \
+Real world test (close to room vs router vs phone hotspot) → tmac stays at 3 no matter the context. Élimine l'hypothèse d'un algorithme de puissance adaptatif (TPC) qui réagirait mal à la distance — c'est un plafond fixe et statique.
+disable_clc=1 sur mt7921_common (bug CLC documenté sur Debian, cas quasi identique ASUS Vivobook S14/MT7922) → paramètre correctement chargé (vérifié via /sys/module/.../parameters/disable_clc = Y, initramfs régénéré, confirmé present dans l'image), mais aucun effet sur tmac. Conclusion : le bug CLC de ce rapport ne s'applique pas à notre cas précis (probablement une régression firmware différente, notre WM Firmware datant de juin 2026 vs mai 2025 pour le cas Debian).
+Dynamic debug kernel sur mt76 → aucun point de debug disponible pour SAR spécifiquement (pas assez de hooks pr_debug dans cette version).
+Décompilation DSDT (acpidump + iasl) → découverte de deux mécanismes distincts :
+
+Un mécanisme SAR propriétaire ASUS via ALIB/WMI (Method SARC → appelle ALIB(0x0C, ...)), différent du DSM standard.
+Les vraies méthodes ACPI que le driver mt76 sait lire : MTDS, MTGS, MTCL, MTAS, MTFG, MTSP, toutes présentes sous \_SB_.PCI0.GPP5.WLAN. Donc le mécanisme attendu par le driver existe bien sur cette machine.
+
+
+Décodage partiel de MTDS → table SAR réelle avec des limites autour de 13dBm/10dBm/8.5dBm selon les modes. Bas, mais pas aussi bas que 3dBm — donc même si cette table s'applique intégralement, elle n'explique pas entièrement le plafond observé.
+Appels ACPI live via acpi_call (MTFG, MTAS, MTSP) → toutes répondent avec des données structurées, confirmant que les méthodes sont vivantes et répondent. Décodage octet par octet non poussé jusqu'au bout (recherche de la structure exacte du parsing driver infructueuse).
+Recherche du bug "use-after-free in mt7921_acpi_read()" → correctif ancien (2022-2023), très probablement déjà mergé dans le kernel 7.1.3 (2026). Piste abandonnée.
+Dump mémoire EC brute (ec_sys) → découverte d'un bit nommé SARF ("SAR Feature") à l'offset 0xC0, actuellement à 0 (dans l'octet 0x60). Test d'écriture envisagé puis abandonné pour raisons de sécurité matérielle (risque rare mais réel de freeze/comportement erratique/dans le pire cas dégât matériel).
+
+Conclusion actuelle
+Le mécanisme ACPI SAR attendu par le driver existe et répond, mais soit sa table ne suffit pas à expliquer tmac=3, soit il y a un bug de parsing non identifié dans le driver ou le firmware WM (juin 2026) sur cette combinaison ASUS/MT7922 précise. Pas de bug public documenté correspondant exactement à ce cas. Décision : contournement matériel (répéteur/point d'accès dans la chambre, ou Ethernet) plutôt que poursuivre l'investigation sur un terrain à risque (EC) ou incertain (recompilation/patch driver).
+
+
+
 
 # Contributing
-i'll add it
+Contributions are welcome. If you feel like something could be modified or improved, feel free to open an issue or a PR. \
+If you consider pushing a big PR, I suggest opening an issue first in order to discuss it. \
+Any wallpaper PR will be instantly denied. Go [here](https://codeberg.org/GlaceAuPlutonium/void-atlas) if you even *want* to submit a wallpaper.
 
 # Credits
 [Void Linux](https://voidlinux.org) for being the amazing distro that it is. \
